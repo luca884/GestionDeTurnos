@@ -1,5 +1,11 @@
 package com.utn.gestion_de_turnos.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "sala")
+
 public class Sala {
     private int Id;
     private int numero;

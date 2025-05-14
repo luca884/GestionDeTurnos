@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @Table(name = "clientes")
 public class Cliente extends Usuario{
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String nombre_banda;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer cant_integrantes;
 }

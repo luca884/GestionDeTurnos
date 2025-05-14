@@ -12,11 +12,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/register", "/api/admin/sign-up", "/api/admin/login", "/error").permitAll()
+                        .requestMatchers("/login", "/register", "/api/admin/sign-up", "/api/admin/login", "/error", "/api/auth/register").permitAll()
 
                         .requestMatchers("/api/admin/all").hasRole("ADMIN")
 
-                        .requestMatchers("/static/**", "/index.html", "/css/**").permitAll()
+                        .requestMatchers("/", "/static/**", "/index.html", "/css/**").permitAll()
 
                         .anyRequest().authenticated()
                 )

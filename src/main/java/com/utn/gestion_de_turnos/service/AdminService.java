@@ -14,10 +14,12 @@ public class AdminService {
 
     @Autowired
     private AdminRepository adminRepository;
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
     public Admin save(Admin admin) {
+        admin.setContrasena(passwordEncoder.encode(admin.getContrasena()));
         return adminRepository.save(admin);
     }
 
@@ -35,17 +37,18 @@ public class AdminService {
 
     public Admin login(String email, String contrasena) {
         Admin admin = adminRepository.findByEmail(email);
+
         if (admin == null) {
-            System.out.println("❌ Email not found: " + email);
-        } else {
-            System.out.println("✅ Found admin: " + admin.getEmail());
-            System.out.println("🔑 Encrypted password in DB: " + admin.getContrasena());
-            System.out.println("🔑 Password entered: " + contrasena);
-            System.out.println("🔍 Password matches? " + passwordEncoder.matches(contrasena, admin.getContrasena()));
+            System.out.println("Email not found: " + email);
+            return null;
         }
-        if (admin != null && passwordEncoder.matches(contrasena,admin.getContrasena())) {
+
+        if (passwordEncoder.matches(contrasena, admin.getContrasena())) {
+            System.out.println("Found admin: " + admin.getEmail());
             return admin;
         }
+
+        System.out.println("Password mismatch for email: " + email);
         return null;
     }
 }

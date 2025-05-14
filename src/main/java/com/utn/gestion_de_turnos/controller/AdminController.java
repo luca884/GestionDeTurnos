@@ -23,9 +23,6 @@ public class AdminController {
     @Autowired
     private AdminService adminService;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
     @PostMapping
     public Admin createAdmin(@RequestBody Admin admin) {
         return adminService.save(admin);

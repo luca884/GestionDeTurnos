@@ -20,13 +20,13 @@ public abstract class Usuario {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String apellido;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true)
     private String dni;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true)
     private String telefono;
 
     @Column(nullable = false, unique = true)

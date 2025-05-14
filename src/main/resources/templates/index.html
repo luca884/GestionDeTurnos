@@ -10,20 +10,7 @@
 </head>
 <body>
 <!-- Encabezado -->
-<header>
-    <div class="header-content">
-        <div class="left">
-            <h1>
-                <a href="/index.html">Gestion de turnos</a>
-            </h1>
-<!--            <a href="/about">Acerca de</a>-->
-        </div>
-        <div class="right">
-            <a href="/login">Iniciar Sesión</a>
-            <a href="/register">Registrarse</a>
-        </div>
-    </div>
-</header>
+<div th:replace="fragments :: header"></div>
 <!-- Contenido Principal -->
 <main>
     <div class="main-content">
@@ -39,9 +26,6 @@
 </main>
 
 <!-- Pie de Página -->
-<footer>
-    <div class="footer-content">
-        <p>Copyright &copy; 2025</p>
-    </div>
-</footer></body>
+<div th:replace="fragments :: footer"></div>
+</body>
 </html>

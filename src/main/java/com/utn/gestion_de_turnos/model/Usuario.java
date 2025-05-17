@@ -35,6 +35,7 @@ public abstract class Usuario {
     @Column(nullable = false)
     private String contrasena;
 
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Rol rol;

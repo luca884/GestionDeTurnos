@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página Principal</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+<!-- Encabezado -->
+<div th:replace="fragments :: header"></div>
+<!-- Contenido Principal -->
+<main>
+    <div class="main-content">
+        <h2>Gestion de turnos</h2>
+        <p>Universidad Tecnológica Nacional (UTN-MDP)</p>
+        <h3>Integrantes:</h3>
+        <ul class="integrantes-list">
+            <li>Rebeca</li>
+            <li>Rustam</li>
+            <li>Luca</li>
+        </ul>
+    </div>
+</main>
+
+<!-- Pie de Página -->
+<div th:replace="fragments :: footer"></div>
+</body>
+</html>

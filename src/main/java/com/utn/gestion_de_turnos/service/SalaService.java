@@ -3,10 +3,12 @@ package com.utn.gestion_de_turnos.service;
 import com.utn.gestion_de_turnos.model.Sala;
 import com.utn.gestion_de_turnos.repository.SalaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class SalaService {
     @Autowired
     private SalaRepository salaRepository;
@@ -32,7 +34,7 @@ public class SalaService {
         return  salaRepository.findByDisponibilidadFalse();
     }
 
-    public void deleteByID(Long id){
+    public void deleteById(Long id){
         salaRepository.deleteById(id);
     }
 

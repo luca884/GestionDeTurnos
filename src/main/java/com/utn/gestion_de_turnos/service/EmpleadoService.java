@@ -47,9 +47,9 @@ public class EmpleadoService {
         Empleado empleado = empleadoRepository.findByEmail(email);
 
         if (empleado == null) {
-            System.out.println("❌ Empleado con email " + email + " no encontrado.");
+            System.out.println("Empleado con email " + email + " no encontrado.");
         } else {
-            System.out.println("✅ Empleado encontrado: " + empleado.getEmail());
+            System.out.println("Empleado encontrado: " + empleado.getEmail());
         }
 
         return empleado;

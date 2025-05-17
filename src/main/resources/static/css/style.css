@@ -8,6 +8,18 @@ body, html {
     flex-direction: column;
 }
 
+.home-link{
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.home-icon{
+    margin-right: 5px;
+    color: white;
+    font-size: 1.2em;
+}
+
 .left {
     display: flex;
     align-items: center;
@@ -36,7 +48,10 @@ header {
 }
 
 .header-content a:hover {
-    text-decoration: underline;
+    text-decoration:none;
+    color: #cccccc;
+    transition: color 0.3s ease;
+
 }
 
 /* Contenido Principal */
@@ -94,13 +109,99 @@ button, .btn {
     border-radius: 4px;
     cursor: pointer;
     text-decoration: none;
+    align-items: center;
 }
 
 button:hover {
     background-color: #218838;
+    text-decoration: none;
+    color: #cccccc;
 }
 
 p{
     font-size: 18px;
     padding: 10px;
 }
+
+/* right block user-info */
+#header-right {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    font-size: 18px;
+}
+
+#user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-role {
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.user-email {
+    color: #c8f2d2;
+}
+
+.header-link-btn {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.user-role i {
+    margin-right: 5px;
+    vertical-align: middle;
+    color: white;
+    font-size: 1.1em;
+}
+
+.logout-btn i {
+    margin-left: 5px;
+    vertical-align: middle;
+    color: #fff;
+}
+
+
+.logout-btn {
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+    font-size: 18px;
+    padding-right: 10px;
+}
+
+.logout-btn i {
+    color: inherit;
+    font-size: 22px;
+}
+
+.logout-btn:hover {
+    color: #cccccc;
+    background-color: transparent;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+.integrantes-list{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+
+

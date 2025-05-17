@@ -6,9 +6,11 @@
     <title>Iniciar Sesión</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
 </head>
 <body>
-<div th:replace="fragments :: header"></div>
+<div th:replace="~{fragments :: header}"></div>
 <main>
     <form class="login-form" id="login-form">
         <h2>Iniciar Sesión</h2>
@@ -17,6 +19,6 @@
         <button type="submit" id="login-btn">Entrar</button>
     </form>
 </main>
-<div th:replace="fragments :: footer"></div>
+<div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>

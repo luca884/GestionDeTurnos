@@ -12,11 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token) {
             const userInfo = document.createElement('div');
             userInfo.id = 'user-info';
-            userInfo.textContent = `Rol: ${role}, Email: ${email}`;
+            userInfo.style.display = 'flex';
+            userInfo.style.alignItems = 'center';
+            userInfo.style.gap = '15px';
 
-            // aca se puede agregar el boton de logout
+            const roleElem = document.createElement('span');
+            roleElem.className = 'user-role';
+            roleElem.textContent = role || '';
+
+            const emailElem = document.createElement('span');
+            emailElem.className = 'user-email';
+            emailElem.textContent = email || '';
+
+            userInfo.appendChild(roleElem);
+            userInfo.appendChild(emailElem);
+
             const logoutBtn = document.createElement('button');
-            logoutBtn.textContent = 'Salir';
+            logoutBtn.className = 'logout-btn';
+            logoutBtn.innerHTML = `Salir<i class="ri-logout-circle-line" style="margin-right: 6px; vertical-align: middle;"></i>`;
             logoutBtn.addEventListener('click', () => {
                 localStorage.clear();
                 updateUI();
@@ -29,13 +42,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const loginBtn = document.createElement('a');
             loginBtn.id = 'login-btn';
             loginBtn.href = '/login';
-            loginBtn.textContent = 'Iniciar sesión';
-            loginBtn.style.marginRight = '10px';
+            loginBtn.className = 'header-link-btn';
+
+            loginBtn.innerHTML = `<i class="ri-login-circle-line" style="margin-right: 6px; vertical-align: middle;"></i>Iniciar sesión`;
 
             const registerBtn = document.createElement('a');
             registerBtn.id = 'register-btn';
             registerBtn.href = '/register';
-            registerBtn.textContent = 'Registrarse';
+            registerBtn.className = 'header-link-btn';
+            registerBtn.innerHTML = `<i class="ri-user-add-fill" style="margin-right: 6px; vertical-align: middle;"></i>Registrarse`;
 
             headerRight.appendChild(loginBtn);
             headerRight.appendChild(registerBtn);
@@ -65,11 +80,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error('Error de servedor: ', errorText);
+                    console.error('Error de servidor: ', errorText);
                     alert('Email o contraseña incorrectos.');
                     return;
                 }
-
 
                 const data = await response.json();
                 localStorage.setItem('token', data.token);

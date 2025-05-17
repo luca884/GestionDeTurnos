@@ -1,5 +1,4 @@
 package com.utn.gestion_de_turnos.security;
-
 import com.utn.gestion_de_turnos.model.Usuario;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,7 +17,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()));
+        return List.of(new SimpleGrantedAuthority(usuario.getRol().name()));
     }
 
     @Override

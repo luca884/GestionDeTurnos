@@ -6,9 +6,10 @@
     <title>Registrarse</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
 </head>
 <body>
-<div th:replace="fragments :: header"></div>
+<div th:replace="~{fragments :: header}"></div>
 <main>
     <div>
         <form th:if="${registrationSuccess == null}" class="register-form" th:action="@{/register}"
@@ -30,6 +31,6 @@
         </div>
     </div>
 </main>
-<div th:replace="fragments :: footer"></div>
+<div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>

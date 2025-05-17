@@ -1,4 +1,4 @@
-package com.utn.gestion_de_turnos.controller;
+package com.utn.gestion_de_turnos.controller.web;
 
 import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Usuario;
@@ -14,14 +14,16 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+// Eso es un controlador de Spring MVC para manejar las vistas de autenticación y registro de usuarios (Frontend)
 
-// frontend controller para manejar las vistas de autenticación
 @Controller
-public class AuthController {
-
+public class AuthViewController {
 
     @Autowired
     private ClienteService clienteService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @GetMapping("/")
     public String home() {
@@ -42,10 +44,6 @@ public class AuthController {
         return "register";
     }
 
-
-
-
-
     @PostMapping("/register")
     public String registerClient(@Valid @ModelAttribute("cliente") Cliente cliente,
                                  BindingResult bindingResult,
@@ -59,13 +57,9 @@ public class AuthController {
             return "register";
         }
 
-        cliente.setContrasena(new BCryptPasswordEncoder().encode(cliente.getContrasena()));
         cliente.setRol(Usuario.Rol.CLIENTE);
         clienteService.save(cliente);
 
         return "redirect:/register?success";
     }
-
-
 }
-

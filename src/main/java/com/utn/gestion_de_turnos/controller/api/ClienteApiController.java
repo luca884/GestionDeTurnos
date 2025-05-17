@@ -1,4 +1,4 @@
-package com.utn.gestion_de_turnos.controller;
+package com.utn.gestion_de_turnos.controller.api;
 import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+// Eso
 
 @RestController
 @RequestMapping("/api/cliente")
-public class ClienteController {
+public class ClienteApiController {
     @Autowired
     private ClienteService clienteService;
 

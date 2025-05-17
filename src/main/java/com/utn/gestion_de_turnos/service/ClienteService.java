@@ -43,15 +43,15 @@ public class ClienteService {
     }
 
     public Optional<Cliente> findByEmail(String email) {
-        return Optional.ofNullable(clienteRepository.findByEmail(email))
-                .map(cliente -> {
-                    System.out.println("Cliente encontrado: " + cliente.getEmail());                    return cliente;
-                })
-                .or(() -> {
-                    System.out.println("Cliente con email " + email + " no encontrado.");                    return Optional.empty();
-                });
+        Cliente cliente = clienteRepository.findByEmail(email);
+        if (cliente != null) {
+            System.out.println("Cliente encontrado: " + cliente.getEmail());
+            return Optional.of(cliente);
+        } else {
+            System.out.println("Cliente con email " + email + " no encontrado.");
+            return Optional.empty();
+        }
     }
-
 
     public Cliente login(String email, String contrasena) {
         Cliente cliente = clienteRepository.findByEmail(email);

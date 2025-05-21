@@ -30,14 +30,14 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        // Декодируем Base64 секрет в байты
+        // cifrar la clave secreta
         byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
         key = Keys.hmacShaKeyFor(keyBytes);
         logger.info("JWT key initialized successfully");
     }
 
     public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+        String username = authentication.getName(); // se usa el email(no nombre) como username para generar el token unico
         logger.info("Generating JWT token for user: {}", username);
 
         Date now = new Date();

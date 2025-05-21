@@ -1,0 +1,207 @@
+/* Estilos Generales */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.home-link{
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.home-icon{
+    margin-right: 5px;
+    color: white;
+    font-size: 1.2em;
+}
+
+.left {
+    display: flex;
+    align-items: center;
+}
+/* Encabezado */
+header {
+    background-color: #28a745;
+    color: white;
+    padding: 15px 0;
+    width: 100%;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: center;
+}
+
+.header-content a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.header-content a:hover {
+    text-decoration:none;
+    color: #cccccc;
+    transition: color 0.3s ease;
+
+}
+
+/* Contenido Principal */
+main {
+    max-width: 1200px;
+    margin: 40px auto;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Pie de Página */
+footer {
+    background-color: #28a745;
+    color: white;
+    padding: 15px 0;
+    width: 100%;
+    text-align: left;
+    position: relative;
+    bottom: 0;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Formularios de Login y Registro */
+.login-form, .register-form {
+    width: 400px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 50px auto;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button, .btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    align-items: center;
+}
+
+button:hover {
+    background-color: #218838;
+    text-decoration: none;
+    color: #cccccc;
+}
+
+p{
+    font-size: 18px;
+    padding: 10px;
+}
+
+/* right block user-info */
+#header-right {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    font-size: 18px;
+}
+
+#user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-role {
+    color: white;
+    display: flex;
+    align-items: center;
+}
+
+.user-email {
+    color: #c8f2d2;
+}
+
+.header-link-btn {
+    display: flex;
+    align-items: center;
+    color: white;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.user-role i {
+    margin-right: 5px;
+    vertical-align: middle;
+    color: white;
+    font-size: 1.1em;
+}
+
+.logout-btn i {
+    margin-left: 5px;
+    vertical-align: middle;
+    color: #fff;
+}
+
+
+.logout-btn {
+    background-color: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+    font-size: 18px;
+    padding-right: 10px;
+}
+
+.logout-btn i {
+    color: inherit;
+    font-size: 22px;
+}
+
+.logout-btn:hover {
+    color: #cccccc;
+    background-color: transparent;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+.integrantes-list{
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+
+

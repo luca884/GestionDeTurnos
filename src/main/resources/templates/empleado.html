@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Empleado</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/script.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="wrapper">
+    <div th:replace="~{fragments :: header}"></div>
+    <main>
+        <div class="container">
+            <div th:replace="~{fragments :: menu-empleado}" class="main-menu"></div>
+            <div class="main-contenido">
+                <h1>Empleado</h1>
+                <p>Estamos mejorando esta sección. Vuelva a visitarnos pronto</p>
+            </div>
+        </div>
+    </main>
+    <div th:replace="~{fragments :: footer}"></div>
+</div>
+</body>
+</html>

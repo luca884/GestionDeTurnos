@@ -67,14 +67,6 @@ public class ReservaService {
         return reservaRepository.findByEstado(estado);
     }
 
-    public List<Reserva> findByClienteId(Long clienteId) {
-        return reservaRepository.findByClienteId(clienteId);
-    }
-
-    public List<Reserva> findBySalaId(Long salaId) {
-        return reservaRepository.findBySalaId(salaId);
-    }
-
     public Reserva cancelarReserva(Long id) {
         Optional<Reserva> reservaOpt = reservaRepository.findById(id);
         if (reservaOpt.isPresent()) {

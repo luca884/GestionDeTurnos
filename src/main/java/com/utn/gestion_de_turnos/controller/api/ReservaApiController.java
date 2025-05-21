@@ -1,6 +1,5 @@
 package com.utn.gestion_de_turnos.controller.api;
 
-
 import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
@@ -26,7 +25,6 @@ public class ReservaApiController {
 
     @Autowired
     private ReservaService reservaService;
-
 
     @PostMapping
     public ResponseEntity<?> saveTurno(@RequestBody ReservaRequest request, Authentication authentication) {
@@ -67,5 +65,4 @@ public class ReservaApiController {
         @NotNull(message = "tipoPago es obligatorio")
         private Reserva.TipoPago tipoPago;
     }
-
 }

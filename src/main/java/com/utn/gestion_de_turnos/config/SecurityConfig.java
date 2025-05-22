@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/register", "/api/auth/**", "/error", "/api/auth/register").permitAll()
                         .requestMatchers("/", "/static/**", "/css/**", "/js/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/salas/**").permitAll()
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers("/admin/empleados").hasAuthority("ADMIN")
                         .requestMatchers("/empleado/**").hasAuthority("EMPLEADO")
                         .requestMatchers("/cliente/reservas").hasAuthority("CLIENTE")
                         .requestMatchers("/api/salas/cliente/activas").hasAuthority("CLIENTE")

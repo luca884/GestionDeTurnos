@@ -43,10 +43,10 @@
     <p class="menu-title">MENU</p>
     <nav>
         <ul class="menu-list">
-            <li><a th:href="@{/admin/empleados}">Empleados</a></li>
-            <li><a th:href="@{/admin/empleados/nuevo}">Nuevo Empleado</a></li>
-            <li><a th:href="@{/admin/salas}">Salas</a></li>
-            <li><a th:href="@{/admin/nueva}">Nueva Sala</a></li>
+            <li><a th:href="@{/admin/empleados}">Todos Empleados</a></li>
+            <li><a th:href="@{/admin/empleados/nuevo}">Crear Empleado</a></li>
+<!--            <li><a th:href="@{/admin/salas}">Todas Salas</a></li>-->
+<!--            <li><a th:href="@{/admin/nueva}">Crear Sala</a></li>-->
         </ul>
     </nav>
 </div>
@@ -107,5 +107,31 @@
 </div>
 
 
+
+<!-- fragments/empleado-form.html -->
+<div th:fragment="empleado-form">
+    <form id="empleadoForm">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required>
+        <label for="apellido">Apellido:</label>
+        <input type="text" id="apellido" name="apellido" required>
+        <label for="dni">DNI:</label>
+        <input type="text" id="dni" name="dni" required>
+        <label for ="telefono">Telefono:</label>
+        <input type="text" id="telefono" name="telefono" required>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <label for ="legajo">Legajo:</label>
+        <input type="text" id="legajo" name="legajo" required>
+        <label for="rol">Rol:</label>
+        <select id="rol" name="rol" required>
+            <option value="">Seleccione...</option>
+            <option value="EMPLEADO">Empleado</option>
+            <option value="ADMIN">Admin</option>
+        </select>
+        <button type="submit" style="margin-top: 15px; width: max-content">Crear Empleado</button>
+    </form>
+    <div id="empleadoResult" style="margin-top: 15px"></div>
+</div>
 </body>
 </html>

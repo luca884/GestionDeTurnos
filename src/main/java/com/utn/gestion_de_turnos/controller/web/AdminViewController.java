@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin")
 public class AdminViewController {
 
-    @GetMapping
+    @GetMapping("/empleados")
     public String adminHome(Model model, Authentication authentication) {
         model.addAttribute("email", authentication.getName());
         model.addAttribute("role", authentication.getAuthorities()
@@ -22,5 +22,16 @@ public class AdminViewController {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(",")));
         return "admin";
+    }
+
+
+    @GetMapping("/empleados/nuevo")
+    public String adminCrearEmpleado(Model model, Authentication authentication) {
+        model.addAttribute("email", authentication.getName());
+        model.addAttribute("role", authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(",")));
+        return "nuevo-empleado";
     }
 }

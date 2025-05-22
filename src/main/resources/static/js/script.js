@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (userInfo.role === 'CLIENTE') {
                         window.location.href = '/cliente/reservas';
                     } else if (userInfo.role === 'ADMIN') {
-                        window.location.href = '/admin';
+                        window.location.href = '/admin/empleados';
                     } else if (userInfo.role === 'EMPLEADO') {
                         window.location.href = '/empleado';
                     } else {
@@ -229,14 +229,12 @@ Tipo de pago: ${reserva.tipoPago}
                 document.getElementById("reservaResult").innerText = mensaje;
 
             } else {
-                // Обработка ошибок с сервера
                 let errorMessage = 'Error al crear la reserva.';
                 if (result && typeof result === 'string') {
                     errorMessage = result;
                 } else if (result && result.message) {
                     errorMessage = result.message;
                 }
-                // Можно добавить проверку на конкретное сообщение
                 if (errorMessage.includes('superpone')) {
                     errorMessage = 'La reserva no se puede crear porque el horario ya está ocupado.';
                 }
@@ -288,5 +286,112 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error(error);
         container.textContent = 'Error al cargar las reservas.';
     }
+});
+
+// mostrar empleados
+document.addEventListener("DOMContentLoaded", async () => {
+    const container = document.getElementById("empleadosContainer");
+    if (!container) return;
+
+    try {
+        const response = await fetch('/api/empleados', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Error al cargar empleados');
+
+        const empleados = await response.json();
+
+        if (empleados.length === 0) {
+            container.textContent = 'No hay empleados.';
+            return;
+        }
+
+        empleados.forEach(empleado => {
+            const legajo = empleado.legajo;
+            const nombreCompleto = `${empleado.nombre} ${empleado.apellido}`;
+            const dni = empleado.dni;
+            const email = empleado.email;
+            const telefono = empleado.telefono;
+
+            const div = document.createElement('div');
+            div.className = 'empleado-item';
+            div.textContent = `Legajo: ${legajo} - Nombre: ${nombreCompleto} - DNI: ${dni} - Email: ${email} - Teléfono: ${telefono}`;
+
+            container.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error(error);
+        container.textContent = 'Error al cargar empleados.';
+    }
+});
+
+// crear empleado
+
+document.addEventListener("DOMContentLoaded", function () {
+    const empleadoForm = document.getElementById("empleadoForm");
+    if (!empleadoForm) {
+        console.error("No encontre el formulario de empleado.");
+        return;
+    }
+
+    empleadoForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const nombre = document.getElementById("nombre").value.trim();
+        const apellido = document.getElementById("apellido").value.trim();
+        const dni = document.getElementById("dni").value.trim();
+        const telefono = document.getElementById("telefono").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const legajo = document.getElementById("legajo").value.trim();
+        const rol = document.getElementById("rol").value;
+        const contrasena = dni;
+
+        if (!nombre || !apellido || !dni || !telefono || !email || !legajo || !rol) {
+            alert("Completa todos los campos.");
+            return;
+        }
+
+        const data = {
+            nombre,
+            apellido,
+            dni,
+            telefono,
+            email,
+            legajo,
+            contrasena,
+            rol
+        };
+
+        try {
+            const response = await fetch('/api/empleados', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                const empleado = result;
+                const mensaje = `Empleado creado correctamente!`;
+                document.getElementById("empleadoResult").innerText = mensaje;
+                empleadoForm.reset();
+                setTimeout(() => {
+                    document.getElementById("empleadoResult").innerText = "";
+                }, 5000);
+
+            } else {
+                const errorText = await response.text();
+                console.error('Respuesta con error:', errorText);
+                alert('Error al crear el empleado.');
+            }
+        } catch (error) {
+            console.error('Error al enviar la solicitud:', error);
+            alert('Error al enviar la solicitud.');
+        }
+    });
 });
 

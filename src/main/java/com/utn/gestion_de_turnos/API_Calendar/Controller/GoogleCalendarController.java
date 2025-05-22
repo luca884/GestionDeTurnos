@@ -1,7 +1,7 @@
-package API_Calendar.Controller;
+package com.utn.gestion_de_turnos.API_Calendar.Controller;
 
 
-import API_Calendar.Service.CalendarService;
+import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/calendar")
-public class CalendarController {
+public class GoogleCalendarController {
 
-    private final CalendarService calendarService;
+    private final GoogleCalendarService googleCalendarService;
 
     @Autowired
-    public CalendarController(CalendarService calendarService) {
-        this.calendarService = calendarService;
+    public GoogleCalendarController(GoogleCalendarService googleCalendarService) {
+        this.googleCalendarService = googleCalendarService;
     }
 
     @PostMapping("/events")
@@ -25,29 +25,29 @@ public class CalendarController {
             @RequestParam String fechaInicio,
             @RequestParam String fechaFin
     ) throws Exception {
-        calendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFin);
+        googleCalendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFin);
         return "✅ Evento creado correctamente.";
     }
 
     @GetMapping("/events")
     public Events listarEventos() throws Exception {
-        return calendarService.listarProximosEventos();
+        return googleCalendarService.listarProximosEventos();
     }
 
     @DeleteMapping("/events/{eventId}")
     public String borrarEvento(@PathVariable String eventId) throws Exception {
-        calendarService.borrarEventoPorId(eventId);
+        googleCalendarService.borrarEventoPorId(eventId);
         return "🗑️ Evento eliminado con ID: " + eventId;
     }
 
     @GetMapping("/events/{eventId}")
     public Event obtenerEventoPorId(@PathVariable String eventId) throws Exception {
-        return calendarService.obtenerEventoPorId(eventId);
+        return googleCalendarService.obtenerEventoPorId(eventId);
     }
 
     @GetMapping("/calendars")
     public String listarCalendarios() throws Exception {
-        calendarService.listarCalendarios();
+        googleCalendarService.listarCalendarios();
         return "📚 Lista de calendarios mostrada por consola.";
     }
 }

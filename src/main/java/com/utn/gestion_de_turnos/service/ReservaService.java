@@ -1,10 +1,18 @@
 package com.utn.gestion_de_turnos.service;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,11 +21,32 @@ public class ReservaService {
 
     @Autowired
     private ReservaRepository reservaRepository;
+    @Autowired
+    private GoogleCalendarService googleCalendarService;
 
-    public Reserva save(Reserva reserva) {
-        return reservaRepository.save(reserva);
+    @Transactional
+    public Reserva crearReserva(Reserva reserva) throws IOException {
+        // Guardás primero en la BDD sin el Google Event ID
+        Reserva reservaGuardada = reservaRepository.save(reserva);
+
+        // Crear evento en Google Calendar
+        String resumen = "Reserva de " + reserva.getCliente().getNombre();
+        String descripcion = "Sala: " + reserva.getSala().getNumero();
+
+        // Convertir Date a formato String ISO para la API
+        String fechaInicio = new DateTime(reserva.getFechaInicio()).toString();
+        String fechaFin = new DateTime(new Date(reserva.getFechaInicio().getTime() + 3600000)).toString(); // +1h
+
+        Event evento = googleCalendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFin);
+
+        // Guardar el ID del evento en la reserva
+        reservaGuardada.setGoogleEventId(evento.getId());
+
+        // Guardar de nuevo en la base con el ID de Google
+        return reservaRepository.save(reservaGuardada);
     }
 
+    @GetMapping("/{id}")
     public Optional<Reserva> findById(Long id) {
         return reservaRepository.findById(id);
     }
@@ -25,10 +54,22 @@ public class ReservaService {
     public List<Reserva> findAll() {
         return reservaRepository.findAll();
     }
-
-    public void deleteById(Long id) {
-        reservaRepository.deleteById(id);
+    @Transactional
+    public void eliminarReserva(Long id) throws IOException {
+        Optional<Reserva> reservaOpt = reservaRepository.findById(id);
+        if (reservaOpt.isPresent()) {
+            Reserva reserva = reservaOpt.get();
+            // Borrar evento de Google Calendar
+            if (reserva.getGoogleEventId() != null) {
+                googleCalendarService.borrarEventoPorId(reserva.getGoogleEventId());
+            }
+            // Borrar reserva de la base
+            reservaRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("Reserva no encontrada");
+        }
     }
+
 
     public List<Reserva> findByEstado(Reserva.Estado estado) {
         return reservaRepository.findByEstado(estado);

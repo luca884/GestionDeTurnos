@@ -1,4 +1,4 @@
-package API_Calendar.Config;
+package com.utn.gestion_de_turnos.API_Calendar.Config;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -17,8 +18,8 @@ public class ReservaApiController {
     private ReservaService reservaService;
 
     @PostMapping
-    public Reserva createReserva(@RequestBody Reserva reserva){
-        return reservaService.save(reserva);
+    public Reserva createReserva(@RequestBody Reserva reserva) throws IOException {
+        return reservaService.crearReserva(reserva);
     }
 
     @GetMapping("/{id}")
@@ -29,8 +30,8 @@ public class ReservaApiController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReservaById(@PathVariable Long id){
-        reservaService.deleteById(id);
+    public void deleteReservaById(@PathVariable Long id) throws IOException {
+        reservaService.eliminarReserva(id);
     }
 
     @GetMapping

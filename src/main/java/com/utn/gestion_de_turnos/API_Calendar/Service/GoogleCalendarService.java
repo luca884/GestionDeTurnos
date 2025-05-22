@@ -1,25 +1,27 @@
-package API_Calendar.Service;
+package com.utn.gestion_de_turnos.API_Calendar.Service;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.util.List;
 
 @Service
-public class CalendarService {
+public class GoogleCalendarService {
 
     private final Calendar calendar;
 
     @Autowired
-    public CalendarService(Calendar calendar) {
+    public GoogleCalendarService(Calendar calendar) {
         this.calendar = calendar;
     }
 
-    public void crearEventoSimple(String resumen, String descripcion, String fechaInicio, String fechaFin)
+
+    public Event crearEventoSimple(String resumen, String descripcion, String fechaInicio, String fechaFin)
             throws IOException {
 
         Event event = new Event()
@@ -36,9 +38,9 @@ public class CalendarService {
                 .setTimeZone("America/Argentina/Buenos_Aires");
         event.setEnd(end);
 
-        event = calendar.events().insert("primary", event).execute();
-        System.out.printf("✅ Evento creado: %s\n", event.getHtmlLink());
+        return calendar.events().insert("primary", event).execute();
     }
+
 
     public Events listarProximosEventos() throws IOException {
         Events events = calendar.events().list("primary")

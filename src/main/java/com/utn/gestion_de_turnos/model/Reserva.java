@@ -28,6 +28,9 @@ public class Reserva {
     @Column(name = "fecha_inicio", nullable = false)
     private Date fechaInicio;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "fecha_fin", nullable = false)
+    private Date fechaFin;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_pago", nullable = false)

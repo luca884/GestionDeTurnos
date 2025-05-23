@@ -2,13 +2,16 @@ package com.utn.gestion_de_turnos.API_Calendar.Service;
 
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
+import com.utn.gestion_de_turnos.model.Reserva;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GoogleCalendarService {
@@ -42,7 +45,43 @@ public class GoogleCalendarService {
     }
 
 
-    public Events listarProximosEventos() throws IOException {
+    public List<Event> listarTodosLosEventos() throws IOException {
+        Events events = calendar.events().list("primary")
+                .setMaxResults(100)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .execute();
+
+        return events.getItems(); // Devuelve lista completa para empleados
+    }
+
+    public List<Event> listarEventosParaCliente(String emailCliente) throws IOException {
+        List<Event> todosLosEventos = listarTodosLosEventos();
+        List<Event> eventosFiltrados = new ArrayList<>();
+
+        for (Event event : todosLosEventos) {
+            String descripcion = event.getDescription() != null ? event.getDescription() : "";
+
+            if (descripcion.contains("EmailCliente: " + emailCliente)) {
+                // Mostrar evento completo si es del cliente
+                eventosFiltrados.add(event);
+            } else {
+                // Mostrar como ocupado si no es del cliente
+                Event eventoOculto = new Event()
+                        .setSummary("No disponible")
+                        .setStart(event.getStart())
+                        .setEnd(event.getEnd());
+                eventosFiltrados.add(eventoOculto);
+            }
+        }
+
+        return eventosFiltrados;
+    }
+
+
+
+
+/*    public Events listarProximosEventos() throws IOException {
         Events events = calendar.events().list("primary")
                 .setMaxResults(10)
                 .setOrderBy("startTime")
@@ -62,7 +101,8 @@ public class GoogleCalendarService {
             }
         }
         return events;
-    }
+        }
+ */
 
     public void borrarEventoPorId(String eventId) throws IOException {
         calendar.events().delete("primary", eventId).execute();

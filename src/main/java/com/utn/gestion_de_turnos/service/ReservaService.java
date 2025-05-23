@@ -31,7 +31,7 @@ public class ReservaService {
 
         // Crear evento en Google Calendar
         String resumen = "Reserva de " + reserva.getCliente().getNombre();
-        String descripcion = "Sala: " + reserva.getSala().getNumero();
+        String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
 
         // Convertir Date a formato String ISO para la API
         String fechaInicio = new DateTime(reserva.getFechaInicio()).toString();

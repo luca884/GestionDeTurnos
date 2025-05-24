@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-// Eso es un controlador REST para manejar las operaciones CRUD de la entidad Cliente.
+// Eso
 
 @RestController
 @RequestMapping("/api/cliente")

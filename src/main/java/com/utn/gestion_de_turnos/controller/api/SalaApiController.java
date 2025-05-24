@@ -1,21 +1,12 @@
 package com.utn.gestion_de_turnos.controller.api;
 
-import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Sala;
-import com.utn.gestion_de_turnos.security.CustomUserDetails;
-import com.utn.gestion_de_turnos.service.ReservaService;
 import com.utn.gestion_de_turnos.service.SalaService;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.core.Authentication;
 
-
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 // Eso es controlador REST para manejar las operaciones CRUD de la entidad Sala
 
@@ -25,9 +16,6 @@ public class SalaApiController {
 
     @Autowired
     private SalaService salaService;
-
-    @Autowired
-    private ReservaService reservaService;
 
     @PostMapping
     public Sala createSala(@RequestBody Sala sala) {
@@ -53,39 +41,26 @@ public class SalaApiController {
         salaService.deleteById(id);
     }
 
-    @GetMapping("/cliente/activas")
-    public ResponseEntity<List<ReservaResponse>> getReservasActivasCliente(Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long clienteId = userDetails.getId();
-
-        List<Reserva> reservas = reservaService.findActiveByClienteId(clienteId);
-
-        List<ReservaResponse> response = reservas.stream()
-                .map(reserva -> new ReservaResponse(
-                        reserva.getId(),
-                        reserva.getSala().getNumero(),
-                        reserva.getSala().getCantPersonas(),
-                        reserva.getFechaInicio(),
-                        reserva.getFechaFinal(),
-                        reserva.getTipoPago(),
-                        reserva.getEstado().name()
-                ))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
+    @PutMapping("/{id}/disponibilidad")
+    public ResponseEntity<?> updateDisponibilidad(@PathVariable Long id,
+                                                  @RequestBody SalaDisponibilidadUpdateRequest request) {
+        return salaService.findById(id).map(sala -> {
+            sala.setDisponibilidad(request.isDisponibilidad());
+            salaService.save(sala);
+            return ResponseEntity.noContent().build();
+        }).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // DTO
-    @Data
-    @AllArgsConstructor
-    public static class ReservaResponse {
-        private Long id;
-        private Integer salaNumero;
-        private Integer salaCapacidad;
-        private LocalDateTime fechaInicio;
-        private LocalDateTime fechaFinal;
-        private Reserva.TipoPago tipoPago;
-        private String estado;
+    public static class SalaDisponibilidadUpdateRequest {
+        private boolean disponibilidad;
+
+        public boolean isDisponibilidad() {
+            return disponibilidad;
+        }
+
+        public void setDisponibilidad(boolean disponibilidad) {
+            this.disponibilidad = disponibilidad;
+        }
     }
 
 

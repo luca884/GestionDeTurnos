@@ -10,7 +10,7 @@ import java.util.Optional;
 // Eso es un controlador REST para manejar las operaciones CRUD (para el Admin) de la entidad Empleado
 
 @RestController
-@RequestMapping("/api/empleados")
+@RequestMapping("/api/empleado")
 public class EmpleadoApiController {
 
     @Autowired

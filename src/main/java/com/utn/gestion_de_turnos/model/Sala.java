@@ -20,6 +20,9 @@ public class Sala {
     @Column(name = "cantidad_personas", nullable = false)
     private int cantPersonas;
 
+    @Column(nullable = false)
+    private boolean disponibilidad;
+
     @Column(length = 255)
     private String descripcion;
 }

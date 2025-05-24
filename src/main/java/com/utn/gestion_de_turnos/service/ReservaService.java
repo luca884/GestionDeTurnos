@@ -1,18 +1,18 @@
 package com.utn.gestion_de_turnos.service;
 
-
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.utn.gestion_de_turnos.model.Reserva;
-import com.utn.gestion_de_turnos.repository.ClienteRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
-import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,13 +23,10 @@ public class ReservaService {
     private ReservaRepository reservaRepository;
     @Autowired
     private GoogleCalendarService googleCalendarService;
-    private ClienteRepository clienteRepository;
-    @Autowired
-
 
     @Transactional
-    public Reserva crearReserva(Reserva reserva) throws IOException, java.io.IOException {
-        // Guardas primero en la BDD sin el Google Event ID
+    public Reserva crearReserva(Reserva reserva) throws IOException {
+        // Guardás primero en la BDD sin el Google Event ID
         Reserva reservaGuardada = reservaRepository.save(reserva);
 
         // Crear evento en Google Calendar
@@ -37,8 +34,8 @@ public class ReservaService {
         String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
 
         // Convertir Date a formato String ISO para la API
-        String fechaInicio = new DateTime(String.valueOf(reserva.getFechaInicio())).toString();
-        String fechaFin = String.valueOf(new DateTime(reserva.getFechaFinal().toString()));
+        String fechaInicio = new DateTime(reserva.getFechaInicio()).toString();
+        String fechaFin = new DateTime(new Date(reserva.getFechaInicio().getTime() + 3600000)).toString(); // +1h
 
         Event evento = googleCalendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFin);
 
@@ -58,7 +55,7 @@ public class ReservaService {
         return reservaRepository.findAll();
     }
     @Transactional
-    public void eliminarReserva(Long id) throws IOException, java.io.IOException {
+    public void eliminarReserva(Long id) throws IOException {
         Optional<Reserva> reservaOpt = reservaRepository.findById(id);
         if (reservaOpt.isPresent()) {
             Reserva reserva = reservaOpt.get();
@@ -86,9 +83,5 @@ public class ReservaService {
             return reservaRepository.save(reserva);
         }
         return null;
-    }
-
-    public List<Reserva> findActiveByClienteId(Long clienteId) {
-        return reservaRepository.findActiveByClienteId(clienteId);
     }
 }

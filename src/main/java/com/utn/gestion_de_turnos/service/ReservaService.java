@@ -1,9 +1,14 @@
 package com.utn.gestion_de_turnos.service;
 
+import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
+import com.utn.gestion_de_turnos.model.Cliente;
+import com.utn.gestion_de_turnos.model.Sala;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.model.Event;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.utn.gestion_de_turnos.model.Reserva;
+import com.utn.gestion_de_turnos.repository.ClienteRepository;
+import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,9 @@ public class ReservaService {
     private ReservaRepository reservaRepository;
     @Autowired
     private GoogleCalendarService googleCalendarService;
+    private ClienteRepository clienteRepository;
+    @Autowired
+    private SalaRepository salaRepository;
 
     @Transactional
     public Reserva crearReserva(Reserva reserva) throws IOException {

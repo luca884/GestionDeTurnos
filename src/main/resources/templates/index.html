@@ -1,32 +1,33 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Página Principal</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css"/>
     <script src="/js/script.js" defer></script>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
 </head>
 <body>
-<!-- Encabezado -->
-<div th:replace="~{fragments :: header}"></div>
-<!-- Contenido Principal -->
-<main>
-    <div class="main-content">
-        <h2>Gestion de turnos</h2>
-        <p>Universidad Tecnológica Nacional (UTN-MDP)</p>
-        <p>Técnico Universitario en Programación</p>
-        <h3>Integrantes:</h3>
-        <ul class="integrantes-list">
-            <li>Luca</li>
-            <li>Rebeca</li>
-            <li>Rustam</li>
-        </ul>
-    </div>
-</main>
 
-<!-- Pie de Página -->
-<div th:replace="~{fragments :: footer}"></div>
+<div class="wrapper">
+    <div th:replace="~{fragments :: header}"></div>
+    <main>
+        <div style="display: block">
+            <div class="home-content">
+                <h2>Gestion de turnos</h2>
+                <p>Universidad Tecnológica Nacional (UTN-MDP)</p>
+                <p>Técnico Universitario en Programación</p>
+                <h3>Integrantes:</h3>
+                <ul class="integrantes-list">
+                    <li>Luca</li>
+                    <li>Rebeca</li>
+                    <li>Rustam</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <div th:replace="~{fragments :: footer}"></div>
+</div>
 </body>
 </html>

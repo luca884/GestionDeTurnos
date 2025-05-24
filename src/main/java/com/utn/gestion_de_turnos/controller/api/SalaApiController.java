@@ -42,6 +42,7 @@ public class SalaApiController {
     }
 
 
+
     @GetMapping
     public List<Sala> getAllSalas() {
         return salaService.findAll();

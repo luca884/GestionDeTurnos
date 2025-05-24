@@ -23,7 +23,7 @@ public class OAuth2Controller {
     public ResponseEntity<?> callback(@RequestParam("code") String code) {
         try {
             String accessToken = intercambiarCodigoPorAccessToken(code);
-            var eventos = googleCalendarService.listarProximosEventos();
+            var eventos = googleCalendarService.listarTodosLosEventos();
             return ResponseEntity.ok(eventos);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("❌ Error: " + e.getMessage());

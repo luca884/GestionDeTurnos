@@ -23,33 +23,26 @@
     </properties>
 
     <dependencies>
-        <!-- Dependencias para API Google Calendar -->
-        <!-- https://mvnrepository.com/artifact/com.google.api-client/google-api-client -->
-        <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.google.oauth-client/google-oauth-client-jetty -->
-        <dependency>
-            <groupId>com.google.oauth-client</groupId>
-            <artifactId>google-oauth-client-jetty</artifactId>
-            <version>1.34.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-calendar</artifactId>
-            <version>v3-rev20220715-2.0.0</version>
-        </dependency>
-        <!-- JacksonFactory para Google JSON -->
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client-jackson2</artifactId>
-            <version>1.43.3</version>
-        </dependency>
+            <!-- Cliente de la API de Google -->
+            <dependency>
+                <groupId>com.google.api-client</groupId>
+                <artifactId>google-api-client</artifactId>
+                <version>2.0.0</version>
+            </dependency>
 
+            <!-- Cliente OAuth con Jetty -->
+            <dependency>
+                <groupId>com.google.oauth-client</groupId>
+                <artifactId>google-oauth-client-jetty</artifactId>
+                <version>1.34.1</version>
+            </dependency>
 
-
+            <!-- Servicio de Google Calendar -->
+            <dependency>
+                <groupId>com.google.apis</groupId>
+                <artifactId>google-api-services-calendar</artifactId>
+                <version>v3-rev20220715-2.0.0</version>
+            </dependency>
 
         <!-- Spring Boot Starters -->
         <dependency>

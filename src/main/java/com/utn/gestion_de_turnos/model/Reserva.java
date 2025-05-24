@@ -37,7 +37,7 @@ public class Reserva {
     private TipoPago tipoPago;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Estado estado;
 
     @Column(name = "google_event_id")
@@ -46,8 +46,8 @@ public class Reserva {
 
     public enum Estado {
         ACTIVO,
-        CANCELADO,
-        FINALIZADO
+        FINALIZADO,
+        CANCELADO
     }
 
     public enum TipoPago {

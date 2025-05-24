@@ -7,18 +7,21 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-
 </head>
 <body>
-<div th:replace="~{fragments :: header}"></div>
-<main>
-    <form class="login-form" id="login-form">
-        <h2>Iniciar Sesión</h2>
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Contraseña" required>
-        <button type="submit" id="login-btn">Entrar</button>
-    </form>
-</main>
-<div th:replace="~{fragments :: footer}"></div>
+<div class="wrapper">
+    <div th:replace="~{fragments :: header}"></div>
+    <main>
+        <div style="display: block">
+            <form class="login-form" id="login-form">
+                <h2>Iniciar Sesión</h2>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Contraseña" required>
+                <button type="submit" id="login-btn">Entrar</button>
+            </form>
+        </div>
+    </main>
+    <div th:replace="~{fragments :: footer}"></div>
+</div>
 </body>
 </html>

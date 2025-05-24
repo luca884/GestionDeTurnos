@@ -27,6 +27,10 @@ public class ClienteService {
         return clienteRepository.save(cliente);
     }
 
+    public Optional<Cliente> findByIdRE(Long id) { // para Entity
+        return clienteRepository.findById(id);
+    }
+
     public Optional<Cliente> findById(Long id) {
         return clienteRepository.findById(id);
     }

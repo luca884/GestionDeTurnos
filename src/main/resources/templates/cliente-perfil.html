@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin</title>
+    <title>Cliente</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
@@ -13,10 +13,10 @@
     <div th:replace="~{fragments :: header}"></div>
     <main>
         <div class="container">
-            <div th:replace="~{fragments :: menu-admin}" class="main-menu"></div>
+            <div th:replace="~{fragments :: menu-cliente}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Todos Empleados</p>
-                <div th:replace="~{fragments :: empleados-table}"></div>
+                <p>Perfil</p>
+                <div th:replace="~{fragments :: update-cliente-perfil(${cliente})}"></div>
             </div>
         </div>
     </main>
@@ -27,8 +27,8 @@
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    let success = [[${success}]];
-    let error = [[${error}]];
+    let success = /*[[${success}]]*/ null;
+    let error = /*[[${error}]]*/ null;
 
     if (success) {
         toastr.success(success);
@@ -38,5 +38,6 @@
     }
     /*]]>*/
 </script>
+
 </body>
 </html>

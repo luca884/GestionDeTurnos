@@ -1,9 +1,13 @@
 package com.utn.gestion_de_turnos.service;
 
+import com.utn.gestion_de_turnos.exception.AccesoProhibidoException;
+import com.utn.gestion_de_turnos.exception.ReservaNoCancelableException;
+import com.utn.gestion_de_turnos.exception.ReservaNotFoundException;
 import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
 import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Sala;
 import com.utn.gestion_de_turnos.model.Reserva;
+import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.ClienteRepository;
 import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
@@ -48,9 +52,6 @@ public class ReservaService {
         return reservaRepository.findByClienteIdAndEstado(clienteId, Reserva.Estado.ACTIVO);
     }
 
-
-
-
     public Optional<Reserva> findById(Long id) {
         return reservaRepository.findById(id);
     }
@@ -59,21 +60,39 @@ public class ReservaService {
         return reservaRepository.findAll();
     }
 
-    public void deleteById(Long id) {
-        reservaRepository.deleteById(id);
-    }
-
     public List<Reserva> findByEstado(Reserva.Estado estado) {
         return reservaRepository.findByEstado(estado);
     }
 
-    public Reserva cancelarReserva(Long id) {
-        Optional<Reserva> reservaOpt = reservaRepository.findById(id);
-        if (reservaOpt.isPresent()) {
-            Reserva reserva = reservaOpt.get();
-            reserva.setEstado(Reserva.Estado.CANCELADO);
-            return reservaRepository.save(reserva);
+
+    public void cancelarReservaById(Long reservaId, Long clienteId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
+
+        if (!reserva.getCliente().getId().equals(clienteId)) {
+            throw new AccesoProhibidoException("No tienes permiso para cancelar esta reserva");
         }
-        return null;
+
+        if (reserva.getEstado() != Reserva.Estado.ACTIVO) {
+            throw new ReservaNoCancelableException("Solo se pueden cancelar reservas activas");
+        }
+
+        if (reserva.getFechaInicio().isBefore(LocalDateTime.now())) {
+            throw new ReservaNoCancelableException("No se puede cancelar una reserva que ya ha comenzado");
+        }
+
+        reserva.setEstado(Reserva.Estado.CANCELADO);
+        reservaRepository.save(reserva);
     }
+
+    public boolean existsActiveReservaForSala(Long salaId) {
+        List<Reserva> reservas = reservaRepository.findBySalaIdAndEstado(salaId, Reserva.Estado.ACTIVO);
+        return !reservas.isEmpty();
+    }
+
+    public void updateReserva(Reserva reserva) {
+        reservaRepository.save(reserva);
+    }
+
+
 }

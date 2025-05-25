@@ -13,10 +13,11 @@
     <div th:replace="~{fragments :: header}"></div>
     <main>
         <div class="container">
+
             <div th:replace="~{fragments :: menu-admin}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Todos Empleados</p>
-                <div th:replace="~{fragments :: empleados-table}"></div>
+                <p>Modificar Sala</p>
+                <div th:replace="~{fragments :: update-sala-table(sala=${sala})}"></div>
             </div>
         </div>
     </main>
@@ -24,19 +25,7 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    let success = [[${success}]];
-    let error = [[${error}]];
-
-    if (success) {
-        toastr.success(success);
-    }
-    if (error) {
-        toastr.error(error);
-    }
-    /*]]>*/
-</script>
 </body>
 </html>
+
+

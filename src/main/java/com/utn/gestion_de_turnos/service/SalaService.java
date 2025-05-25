@@ -15,6 +15,9 @@ public class SalaService {
     @Autowired
     private SalaRepository salaRepository;
 
+    @Autowired
+    private ReservaService reservaService;
+
     public SalaService(SalaRepository salaRepository) {
         this.salaRepository = salaRepository;
     }
@@ -37,6 +40,10 @@ public class SalaService {
 
     public List<Sala> encontrarSalasDisponibles(LocalDateTime fechaInicio, LocalDateTime fechaFinal) {
         return salaRepository.encontrarSalasDisponibles(fechaInicio, fechaFinal);
+    }
+
+    public boolean canDeleteSala(Long salaId) {
+        return !reservaService.existsActiveReservaForSala(salaId);
     }
 
 

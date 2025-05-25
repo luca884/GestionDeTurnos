@@ -7,12 +7,11 @@ import com.utn.gestion_de_turnos.service.ReservaService;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class ReservaApiController {
     private ReservaService reservaService;
 
     @PostMapping
-    public ResponseEntity<?> saveTurno(@RequestBody ReservaRequest request, Authentication authentication) {
+    public ResponseEntity<?> saveReserva(@RequestBody ReservaRequest request, Authentication authentication) {
         try {
             CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
             Long clienteId = user.getId();
@@ -41,6 +40,20 @@ public class ReservaApiController {
         } catch (TiempoDeReservaOcupadoException e) {
             Map<String, String> error = Map.of("message", e.getMessage());
             return ResponseEntity.badRequest().body(error);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<?> cancelarReserva(@PathVariable Long id, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long clienteId = userDetails.getId();
+
+        try {
+            reservaService.cancelarReservaById(id, clienteId);
+            return ResponseEntity.ok(Map.of("message", "Reserva cancelada correctamente"));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

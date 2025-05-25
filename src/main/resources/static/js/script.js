@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", function () {
             salaSelect.length = 1;
             data.forEach(sala => {
                 const descripcion = sala.descripcion ? ` - ${sala.descripcion}` : "";
-                const label = `Sala ${sala.numero}(capacidad: ${sala.cantPersonas})${descripcion}`;
+                const label = `Sala ${sala.numero}(capacidad: ${sala.cantidad_personas})${descripcion}`;
                 salaSelect.add(new Option(label, sala.id));
             });
         })
@@ -219,15 +219,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok) {
                 const reserva = result;
-                const mensaje = `
-Reserva creada correctamente!
-Sala: ${reserva.sala.numero} (Capacidad: ${reserva.sala.cantPersonas})
-Fecha inicio: ${reserva.fechaInicio.replace('T', ' ')}
-Fecha fin: ${reserva.fechaFinal.replace('T', ' ')}
-Tipo de pago: ${reserva.tipoPago}
-                `;
+                const mensaje = `Reserva creada correctamente!`;
                 document.getElementById("reservaResult").innerText = mensaje;
-
+                reservaForm.reset();
+                setTimeout(() => {
+                    document.getElementById("reservaResult").innerText = "";
+                }, 5000);
             } else {
                 let errorMessage = 'Error al crear la reserva.';
                 if (result && typeof result === 'string') {
@@ -236,9 +233,13 @@ Tipo de pago: ${reserva.tipoPago}
                     errorMessage = result.message;
                 }
                 if (errorMessage.includes('superpone')) {
-                    errorMessage = 'La reserva no se puede crear porque el horario ya está ocupado.';
+                    errorMessage = 'Este horario ya está ocupado.';
                 }
                 document.getElementById("reservaResult").innerText = errorMessage;
+                reservaForm.reset();
+                setTimeout(() => {
+                    document.getElementById("reservaResult").innerText = "";
+                }, 5000);
             }
         } catch (error) {
             document.getElementById("reservaResult").innerText = 'Error al enviar la solicitud.';
@@ -251,47 +252,115 @@ Tipo de pago: ${reserva.tipoPago}
 // mostrar reservas activas
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const container = document.getElementById("salasReservasContainer");
-    if (!container) return;
+    const tbody = document.getElementById("reservasTableBody");
+    if (!tbody) return;
 
     try {
         const response = await fetch('/api/salas/cliente/activas', {
             method: 'GET',
-            headers: {'Content-Type': 'application/json'},
+            headers: { 'Content-Type': 'application/json' },
             credentials: 'include'
         });
 
         if (!response.ok) throw new Error('Error al cargar reservas activas');
-
         const reservas = await response.json();
 
+        tbody.innerHTML = '';
+
         if (reservas.length === 0) {
-            container.textContent = 'No tienes reservas activas.';
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 6;
+            td.textContent = 'No tienes reservas activas.';
+            td.style.textAlign = 'center';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
             return;
         }
 
         reservas.forEach(reserva => {
+            console.log("Reserva.fechaInicio:", reserva.fechaInicio);
+
+            const tr = document.createElement('tr');
+
             const fechaInicioFormateada = reserva.fechaInicio.replace('T', ' ').slice(0, 16);
             const fechaFinalFormateada = reserva.fechaFinal.replace('T', ' ').slice(0, 16);
 
-            const div = document.createElement('div');
-            div.className = 'reserva-item';
-            div.textContent = `Sala ${reserva.salaNumero} (Capacidad: ${reserva.salaCapacidad}) - ` +
-                `${fechaInicioFormateada} a ${fechaFinalFormateada} - ` +
-                `Pago: ${reserva.tipoPago} - Estado: ${reserva.estado}`;
-            container.appendChild(div);
+            // Sala
+            const tdSala = document.createElement('td');
+            tdSala.textContent = `#${reserva.salaNumero} (${reserva.salaCapacidad} personas)`;
+            tr.appendChild(tdSala);
+
+            // Fecha inicio
+            const tdInicio = document.createElement('td');
+            tdInicio.textContent = fechaInicioFormateada;
+            tr.appendChild(tdInicio);
+
+            // Fecha final
+            const tdFinal = document.createElement('td');
+            tdFinal.textContent = fechaFinalFormateada;
+            tr.appendChild(tdFinal);
+
+            // Tipo de pago
+            const tdPago = document.createElement('td');
+            tdPago.textContent = reserva.tipoPago;
+            tr.appendChild(tdPago);
+
+            // Estado
+            const tdEstado = document.createElement('td');
+            tdEstado.textContent = reserva.estado;
+            tr.appendChild(tdEstado);
+
+            // Acciones
+            const tdAcciones = document.createElement('td');
+            tdAcciones.classList.add('actions');
+
+            // Editar
+            const editBtn = document.createElement('a');
+            editBtn.href = `/cliente/reservas/update?id=${reserva.id}`; // адаптируй URL под себя
+            editBtn.title = 'Editar';
+            editBtn.innerHTML = '<i class="ri-edit-line"></i>';
+            tdAcciones.appendChild(editBtn);
+
+            // Cancelar
+            const deleteBtn = document.createElement('button');
+            deleteBtn.title = 'Cancelar reserva';
+            deleteBtn.innerHTML = '<i class="ri-delete-bin-line"></i>';
+
+            deleteBtn.addEventListener('click', async () => {
+                if (confirm('¿Deseas cancelar esta reserva?')) {
+                    try {
+                        const res = await fetch(`/api/reserva/${reserva.id}/cancelar`, { method: 'PUT' });
+                        if (res.ok) {
+                            tr.remove();
+                            showToast('success', 'Reserva cancelada con éxito');
+                        } else {
+                            alert('Error al cancelar la reserva.');
+                        }
+                    } catch {
+                        alert('Error de red al cancelar la reserva.');
+                    }
+                }
+            });
+
+            tdAcciones.appendChild(deleteBtn);
+            tr.appendChild(tdAcciones);
+
+            tbody.appendChild(tr);
         });
 
     } catch (error) {
         console.error(error);
-        container.textContent = 'Error al cargar las reservas.';
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;">Error al cargar las reservas.</td></tr>`;
     }
 });
 
+
 // mostrar empleados
+
 document.addEventListener("DOMContentLoaded", async () => {
-    const container = document.getElementById("empleadosContainer");
-    if (!container) return;
+    const tbody = document.getElementById("empleadosTableBody");
+    if (!tbody) return;
 
     try {
         const response = await fetch('/api/empleados', {
@@ -304,30 +373,92 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const empleados = await response.json();
 
+        tbody.innerHTML = '';
+
         if (empleados.length === 0) {
-            container.textContent = 'No hay empleados.';
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 6;
+            td.textContent = 'No hay empleados.';
+            td.style.textAlign = 'center';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
             return;
         }
 
         empleados.forEach(empleado => {
-            const legajo = empleado.legajo;
-            const nombreCompleto = `${empleado.nombre} ${empleado.apellido}`;
-            const dni = empleado.dni;
-            const email = empleado.email;
-            const telefono = empleado.telefono;
+            const tr = document.createElement('tr');
 
-            const div = document.createElement('div');
-            div.className = 'empleado-item';
-            div.textContent = `Legajo: ${legajo} - Nombre: ${nombreCompleto} - DNI: ${dni} - Email: ${email} - Teléfono: ${telefono}`;
+            // Legajo
+            const tdLegajo = document.createElement('td');
+            tdLegajo.textContent = empleado.legajo;
+            tr.appendChild(tdLegajo);
 
-            container.appendChild(div);
+            // Nombre Completo
+            const tdNombre = document.createElement('td');
+            tdNombre.textContent = `${empleado.nombre} ${empleado.apellido}`;
+            tr.appendChild(tdNombre);
+
+            // DNI
+            const tdDni = document.createElement('td');
+            tdDni.textContent = empleado.dni;
+            tr.appendChild(tdDni);
+
+            // Email
+            const tdEmail = document.createElement('td');
+            tdEmail.textContent = empleado.email;
+            tr.appendChild(tdEmail);
+
+            // Teléfono
+            const tdTelefono = document.createElement('td');
+            tdTelefono.textContent = empleado.telefono;
+            tr.appendChild(tdTelefono);
+
+            // Acciones
+            const tdAcciones = document.createElement('td');
+            tdAcciones.classList.add('actions');
+
+            // editar empleado
+            const editBtn = document.createElement('a');
+            editBtn.href = `/admin/empleados/update?id=${empleado.id}`;
+            editBtn.title = 'Editar';
+            editBtn.innerHTML = '<i class="ri-edit-line"></i>';
+            editBtn.style.marginRight = '10px';
+            tdAcciones.appendChild(editBtn);
+
+            // delete empleado
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.title = 'Eliminar';
+            deleteBtn.innerHTML = '<i class="ri-delete-bin-line"></i>';
+            deleteBtn.addEventListener('click', async () => {
+                if (confirm('¿Desea eliminar este empleado?')) {
+                    try {
+                        const res = await fetch(`/api/empleados/${empleado.id}`, {method: 'DELETE'});
+                        if (res.ok) {
+                            tr.remove();
+                            showToast('success', 'Empleado eliminado correctamente! ');
+                        } else {
+                            alert('Error al eliminar el empleado.');
+                        }
+                    } catch {
+                        alert('Error de red al eliminar el empleado.');
+                    }
+                }
+            });
+            tdAcciones.appendChild(deleteBtn);
+
+            tr.appendChild(tdAcciones);
+
+            tbody.appendChild(tr);
         });
 
     } catch (error) {
         console.error(error);
-        container.textContent = 'Error al cargar empleados.';
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:red;">Error al cargar empleados.</td></tr>`;
     }
 });
+
 
 // crear empleado
 
@@ -347,10 +478,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const telefono = document.getElementById("telefono").value.trim();
         const email = document.getElementById("email").value.trim();
         const legajo = document.getElementById("legajo").value.trim();
-        const rol = document.getElementById("rol").value;
         const contrasena = dni;
 
-        if (!nombre || !apellido || !dni || !telefono || !email || !legajo || !rol) {
+        if (!nombre || !apellido || !dni || !telefono || !email || !legajo) {
             alert("Completa todos los campos.");
             return;
         }
@@ -363,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function () {
             email,
             legajo,
             contrasena,
-            rol
+            rol: "EMPLEADO"
         };
 
         try {
@@ -375,14 +505,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const result = await response.json();
             if (response.ok) {
-                const empleado = result;
                 const mensaje = `Empleado creado correctamente!`;
-                document.getElementById("empleadoResult").innerText = mensaje;
+                showToast('success', mensaje);
                 empleadoForm.reset();
                 setTimeout(() => {
-                    document.getElementById("empleadoResult").innerText = "";
-                }, 5000);
-
+                    window.location.href = '/admin/empleados';
+                }, 1500);
             } else {
                 const errorText = await response.text();
                 console.error('Respuesta con error:', errorText);
@@ -394,4 +522,184 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 });
+
+// crear sala
+
+document.addEventListener("DOMContentLoaded", function () {
+    const salaForm = document.getElementById("salaForm");
+    if (!salaForm) {
+        console.error("No encontre el formulario de sala.");
+        return;
+    }
+
+    salaForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const numero = document.getElementById("numero").value.trim();
+        const cantPersonas = Number(document.getElementById("capacidad").value.trim());
+        const descripcion = document.getElementById("descripcion").value.trim();
+        if (!numero || !cantPersonas) {
+            alert("Completa todos los campos.");
+            return;
+        }
+
+        const data = {
+            numero: numero,
+            cantidad_personas: cantPersonas,
+            descripcion: descripcion
+        };
+
+        try {
+            const response = await fetch('/api/salas', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showToast('success', 'Sala creada correctamente!');
+                salaForm.reset();
+                setTimeout(() => {
+                    window.location.href = '/admin/salas';
+                }, 1500);
+            } else {
+                const errorText = await response.text();
+                showToast('error', 'Error al crear la sala: ' + errorText);
+            }
+        } catch (error) {
+            console.error('Error al enviar la solicitud:', error);
+            alert('Error al enviar la solicitud.');
+        }
+    });
+});
+
+
+// mostrar salas
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const tbody = document.getElementById("salasTableBody");
+    if (!tbody) return;
+
+    try {
+        const response = await fetch('/api/salas', {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+        });
+
+        if (!response.ok) throw new Error('Error al cargar salas');
+        const salas = await response.json();
+
+        tbody.innerHTML = '';
+
+        if (salas.length === 0) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 4;
+            td.textContent = 'No hay salas.';
+            td.style.textAlign = 'center';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
+        }
+
+        salas.forEach(sala => {
+            const tr = document.createElement('tr');
+
+            // Número
+            const tdNumero = document.createElement('td');
+            tdNumero.textContent = sala.numero;
+            tr.appendChild(tdNumero);
+
+            // Capacidad
+            const tdCapacidad = document.createElement('td');
+            tdCapacidad.textContent = sala.cantidad_personas;
+            tr.appendChild(tdCapacidad);
+
+            // Descripción
+            const tdDescripcion = document.createElement('td');
+            tdDescripcion.textContent = sala.descripcion || 'Sin descripción';
+            tr.appendChild(tdDescripcion);
+
+            // Acciones
+            const tdAcciones = document.createElement('td');
+            tdAcciones.classList.add('actions');
+
+            // Edit button
+            const editBtn = document.createElement('a');
+            editBtn.href = `/admin/salas/update?id=${sala.id}`;
+            editBtn.title = 'Editar';
+            editBtn.innerHTML = '<i class="ri-edit-line"></i>';
+            tdAcciones.appendChild(editBtn);
+
+            // Delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.title = 'Eliminar';
+            deleteBtn.innerHTML = '<i class="ri-delete-bin-line"></i>';
+
+            deleteBtn.addEventListener('click', async () => {
+                try {
+                    const canDeleteRes = await fetch(`/api/salas/${sala.id}/can-delete`);
+                    const canDelete = await canDeleteRes.json();
+
+                    if (!canDelete) {
+                        alert('Esta sala no se puede eliminar porque hay reservas activas.');
+                        return;
+                    }
+
+                    if (confirm('¿Desea eliminar esta sala?')) {
+                        const res = await fetch(`/api/salas/${sala.id}`, {method: 'DELETE'});
+                        if (res.ok) {
+                            tr.remove();
+                            showToast('success', 'Sala eliminada correctamente! ');
+                        } else {
+                            alert('Error al eliminar la sala.');
+                        }
+                    }
+                } catch {
+                    alert('Error de red al eliminar la sala.');
+                }
+            });
+
+            tdAcciones.appendChild(deleteBtn);
+            tr.appendChild(tdAcciones);
+
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error(error);
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:red;">Error al cargar salas.</td></tr>`;
+    }
+});
+
+function showToast(type, message) {
+    if (typeof toastr === 'undefined') {
+        alert(message);
+        return;
+    }
+    switch(type) {
+        case 'success':
+            toastr.success(message);
+            break;
+        case 'error':
+            toastr.error(message);
+            break;
+        case 'info':
+            toastr.info(message);
+            break;
+        case 'warning':
+            toastr.warning(message);
+            break;
+        default:
+            toastr.info(message);
+    }
+}
+ document.addEventListener("DOMContentLoaded", function () {
+    const toastSuccess = /*[[${toastSuccess}]]*/ null;
+    const toastError = /*[[${toastError}]]*/ null;
+
+});
+
 

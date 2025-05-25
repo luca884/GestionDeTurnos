@@ -3,13 +3,13 @@ package com.utn.gestion_de_turnos.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "reservas")
+@Table(name = "turnos")
 public class Reserva {
 
     @Id
@@ -24,13 +24,11 @@ public class Reserva {
     @JoinColumn(name = "sala_id", nullable = false)
     private Sala sala;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "fecha_inicio", nullable = false)
-    private Date fechaInicio;
+    private LocalDateTime fechaInicio;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "fecha_fin", nullable = false)
-    private Date fechaFin;
+    @Column(name = "fecha_final", nullable = false)
+    private LocalDateTime fechaFinal;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_pago", nullable = false)
@@ -43,11 +41,10 @@ public class Reserva {
     @Column(name = "google_event_id")
     private String googleEventId;
 
-
     public enum Estado {
-        RESERVADO,
+        ACTIVO,
         CANCELADO,
-        DISPONIBLE
+        FINALIZADO
     }
 
     public enum TipoPago {

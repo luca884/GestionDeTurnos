@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <title>Cliente</title>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
 </head>
 <body>
 <div class="wrapper">
@@ -13,13 +15,17 @@
         <div class="container">
             <div th:replace="~{fragments :: menu-cliente}" class="main-menu"></div>
             <div class="main-contenido">
-                <h1>Crear Reserva</h1>
-                <div th:replace="~{fragments :: reserva-form}"></div>
+                <p>Modificar Reserva</p>
+                <div th:replace="~{fragments :: update-reserva-table(reserva=${reserva})}"></div>
+                <div th:if="${error}" class="alert" role="alert">
+                    <p th:text="${error}"></p>
+                </div>
             </div>
         </div>
     </main>
     <div th:replace="~{fragments :: footer}"></div>
 </div>
-<script src="/js/script.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </body>
 </html>

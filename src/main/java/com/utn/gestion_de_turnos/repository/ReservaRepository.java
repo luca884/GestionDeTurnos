@@ -17,11 +17,15 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findBySalaId(Long salaId);
 
-    List<Reserva> findActiveByClienteId(Long clienteId);
 
     @Query("SELECT t FROM Reserva t WHERE t.sala.id = :salaId AND t.estado = 'ACTIVO' AND " +
             "(:fechaInicio < t.fechaFinal AND :fechaFinal > t.fechaInicio)")
     List<Reserva> findConflictingReservas(@Param("salaId") Long salaId,
                                           @Param("fechaInicio") LocalDateTime fechaInicio,
                                           @Param("fechaFinal") LocalDateTime fechaFinal);
+
+
+    @Query("SELECT r FROM Reserva r WHERE r.sala.id = :salaId AND r.estado = :estado")
+    List<Reserva> findBySalaIdAndEstado(@Param("salaId") Long salaId,
+                                        @Param("estado") Reserva.Estado estado);
 }

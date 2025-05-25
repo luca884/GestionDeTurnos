@@ -8,6 +8,9 @@ import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -25,8 +28,8 @@ public class GoogleCalendarController {
     public String crearEvento(
             @RequestParam String resumen,
             @RequestParam String descripcion,
-            @RequestParam String fechaInicio,
-            @RequestParam String fechaFin
+            @RequestParam LocalDateTime fechaInicio,
+            @RequestParam LocalDateTime fechaFin
     ) throws Exception {
         googleCalendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFin);
         return "✅ Evento creado correctamente.";
@@ -47,7 +50,7 @@ public class GoogleCalendarController {
     // 📌 Este Endpoint hace lo mismo que el metodo de arriba pero no hace falta pasarle el mail por paramentro ya sabe cual es cuando hace el login con Spring Security
     @GetMapping("cliente ")
     public List<Event> listarEventosDelClienteAutenticado(Authentication authentication) throws IOException, java.io.IOException {
-        String emailCliente = authentication.getName(); // o getPrincipal().getUsername()
+        String emailCliente = authentication.name(); // o getPrincipal().getUsername()
         return googleCalendarService.listarEventosParaCliente(emailCliente);
     }
 

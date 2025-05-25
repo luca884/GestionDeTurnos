@@ -1,5 +1,6 @@
 package com.utn.gestion_de_turnos.API_Calendar.Service;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 import com.utn.gestion_de_turnos.model.Reserva;
@@ -9,6 +10,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
+import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,20 +28,28 @@ public class GoogleCalendarService {
     }
 
 
-    public Event crearEventoSimple(String resumen, String descripcion, String fechaInicio, String fechaFin)
+    public Event crearEventoSimple(String resumen, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin)
             throws IOException {
+
+        // Convertir LocalDateTime a java.util.Date
+        Date inicioDate =  Date.from(fechaInicio.atZone(ZoneId.of("America/Argentina/Buenos_Aires")).toInstant());
+        Date finDate =  Date.from(fechaFin.atZone(ZoneId.of("America/Argentina/Buenos_Aires")).toInstant());
+
+        // Convertir java.util.Date a DateTime (de la API de Google)
+        DateTime fechaInicioGoogle = new DateTime(inicioDate);
+        DateTime fechaFinGoogle = new DateTime(finDate);
 
         Event event = new Event()
                 .setSummary(resumen)
                 .setDescription(descripcion);
 
         EventDateTime start = new EventDateTime()
-                .setDateTime(new com.google.api.client.util.DateTime(fechaInicio))
+                .setDateTime(fechaInicioGoogle)
                 .setTimeZone("America/Argentina/Buenos_Aires");
         event.setStart(start);
 
         EventDateTime end = new EventDateTime()
-                .setDateTime(new com.google.api.client.util.DateTime(fechaFin))
+                .setDateTime(fechaFinGoogle)
                 .setTimeZone("America/Argentina/Buenos_Aires");
         event.setEnd(end);
 

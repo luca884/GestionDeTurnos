@@ -25,6 +25,8 @@ public class SecurityConfig {
     public SecurityConfig(CustomUserDetailsService userDetailsService) {
     }
 
+    private JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter;
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();

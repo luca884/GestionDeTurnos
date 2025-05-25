@@ -128,17 +128,6 @@ public class SalaApiController {
     }
 
 
-    @PutMapping("/{id}/disponibilidad")
-    public ResponseEntity<?> updateDisponibilidad(@PathVariable Long id,
-                                                  @RequestBody SalaDisponibilidadUpdateRequest request) {
-        return salaService.findById(id).map(sala -> {
-            sala.setDisponibilidad(request.isDisponibilidad());
-            salaService.save(sala);
-            return ResponseEntity.noContent().build();
-        }).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-
     // DTOs
 
     @Data

@@ -76,7 +76,7 @@ public class ReservaApiController {
 
     @DeleteMapping("/{id}")
     public void deleteReservaById(@PathVariable Long id) throws IOException {
-        reservaService.eliminarReserva(id);
+       // reservaService.eliminarReserva(id);
     }
 
     @GetMapping

@@ -7,30 +7,34 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
 </head>
 <body>
-<div th:replace="~{fragments :: header}"></div>
-<main>
-    <div>
-        <form th:if="${registrationSuccess == null}" class="register-form" th:action="@{/register}"
-              th:object="${cliente}" method="post">
-            <h2>Registrarse</h2>
-            <input type="text" th:field="*{nombre}" placeholder="Nombre de usuario" required>
-            <input type="email" th:field="*{email}" placeholder="Correo Electrónico" required>
-            <input type="password" th:field="*{contrasena}" placeholder="Contraseña" required>
-            <button type="submit" id="register-btn">Crear Cuenta</button>
-        </form>
-        <div th:if="${registrationSuccess}" style="color: green; margin-bottom: 1em;">
-            <p>¡Registro exitoso!</p>
-            <a href="/login" class="btn">Iniciar Sesión</a>
+<div class="wrapper">
+    <div th:replace="~{fragments :: header}"></div>
+    <main>
+        <div style="display: block">
+            <form th:if="${registrationSuccess == null}" class="register-form" th:action="@{/register}"
+                  th:object="${cliente}" method="post">
+                <h2>Registrarse</h2>
+                <input type="text" th:field="*{nombre}" placeholder="Nombre de usuario" required>
+                <input type="email" th:field="*{email}" placeholder="Correo Electrónico" required>
+                <input type="password" th:field="*{contrasena}" placeholder="Contraseña" required>
+                <button type="submit" id="register-btn">Crear Cuenta</button>
+            </form>
+            <div th:if="${registrationSuccess}" style="color: green; margin-bottom: 1em; display: flex; flex-direction: column; align-items: center;">
+                <p>¡Registro exitoso!</p>
+                <a href="/login" class="btn" style="width: fit-content">Iniciar Sesión</a>
+            </div>
+            <div th:if="${emailError}" style="color: red; margin-bottom: 1em; display: flex; flex-direction: column; align-items: center;">
+                <p th:text="${emailError}"></p>
+                <a href="/login" class="btn" style="width: min-content; white-space: nowrap;">Iniciar Sesión</a>
+            </div>
         </div>
-
-        <div th:if="${emailError}" style="color: red; margin-bottom: 1em;">
-            <p th:text="${emailError}"></p>
-            <a href="/login" class="btn">Iniciar Sesión</a>
-        </div>
-    </div>
-</main>
-<div th:replace="~{fragments :: footer}"></div>
+    </main>
+    <div th:replace="~{fragments :: footer}"></div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 </body>
 </html>

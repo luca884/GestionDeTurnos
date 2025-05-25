@@ -23,7 +23,7 @@ public class ClienteApiController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Cliente> getClienteById(@PathVariable Long id) {
-        return clienteService.findByIdRE(id)
+        return clienteService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

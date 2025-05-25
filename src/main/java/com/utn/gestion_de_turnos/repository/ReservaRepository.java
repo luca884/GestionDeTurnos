@@ -23,4 +23,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findConflictingReservas(@Param("salaId") Long salaId,
                                           @Param("fechaInicio") LocalDateTime fechaInicio,
                                           @Param("fechaFinal") LocalDateTime fechaFinal);
+
+
+    @Query("SELECT r FROM Reserva r WHERE r.sala.id = :salaId AND r.estado = :estado")
+    List<Reserva> findBySalaIdAndEstado(@Param("salaId") Long salaId,
+                                        @Param("estado") Reserva.Estado estado);
 }

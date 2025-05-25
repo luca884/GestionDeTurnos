@@ -1,5 +1,6 @@
 package com.utn.gestion_de_turnos.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class Sala {
     @Column(nullable = false)
     private int numero;
 
+    @JsonProperty("cantidad_personas")
     @Column(name = "cantidad_personas", nullable = false)
     private int cantPersonas;
 

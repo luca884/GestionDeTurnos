@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
 </head>
 <body>
 <div class="wrapper">
@@ -15,7 +16,7 @@
         <div style="display: block">
             <form class="login-form" id="login-form">
                 <h2>Iniciar Sesión</h2>
-                <input type="email" name="email" placeholder="Email" required>
+                <input type="email" name="email" id="email" placeholder="Email" th:value="${prefillEmail}" required />
                 <input type="password" name="password" placeholder="Contraseña" required>
                 <button type="submit" id="login-btn">Entrar</button>
             </form>
@@ -23,5 +24,15 @@
     </main>
     <div th:replace="~{fragments :: footer}"></div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+
+    if (success === 'registro') {
+        toastr.success('Registro exitoso');
+    }
+</script>
 </body>
 </html>

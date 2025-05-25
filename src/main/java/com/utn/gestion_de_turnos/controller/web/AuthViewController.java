@@ -31,9 +31,19 @@ public class AuthViewController {
     }
 
     @GetMapping("/login")
-    public String login() {
+    public String loginPage(@RequestParam(value = "success", required = false) String success,
+                            @RequestParam(value = "email", required = false) String email,
+                            Model model) {
+        if ("registro".equals(success)) {
+            model.addAttribute("loginSuccess", true);
+        }
+        if (email != null) {
+            model.addAttribute("prefillEmail", email);
+        }
         return "login";
     }
+
+
 
     @GetMapping("/register")
     public String register(@RequestParam(value = "success", required = false) String success, Model model) {
@@ -59,7 +69,7 @@ public class AuthViewController {
 
         cliente.setRol(Usuario.Rol.CLIENTE);
         clienteService.save(cliente);
-
-        return "redirect:/register?success";
+        return "redirect:/login?success=registro&email=" + cliente.getEmail();
     }
+
 }

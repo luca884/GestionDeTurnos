@@ -60,12 +60,17 @@ public class ReservaService {
         return reservaRepository.findAll();
     }
 
+
+    public List<Reserva> findByAllActivas() {
+        return reservaRepository.findByEstado(Reserva.Estado.ACTIVO);
+    }
+
     public List<Reserva> findByEstado(Reserva.Estado estado) {
         return reservaRepository.findByEstado(estado);
     }
 
 
-    public void cancelarReservaById(Long reservaId, Long clienteId) {
+    public void cancelarReservaPorCliente(Long reservaId, Long clienteId) {
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
 
@@ -91,6 +96,22 @@ public class ReservaService {
     }
 
     public void updateReserva(Reserva reserva) {
+        reservaRepository.save(reserva);
+    }
+
+
+    public void cancelarReservaPorEmpleado(Long reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
+
+        if (reserva.getEstado() != Reserva.Estado.ACTIVO) {
+            throw new ReservaNoCancelableException("Solo se pueden cancelar reservas activas");
+        }
+
+        if (reserva.getFechaInicio().isBefore(LocalDateTime.now())) {
+            throw new ReservaNoCancelableException("No se puede cancelar una reserva que ya ha comenzado");
+        }
+        reserva.setEstado(Reserva.Estado.CANCELADO);
         reservaRepository.save(reserva);
     }
 

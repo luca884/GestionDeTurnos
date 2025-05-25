@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Empleado</title>
+    <title>Cliente</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
@@ -15,8 +15,12 @@
         <div class="container">
             <div th:replace="~{fragments :: menu-empleado}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Todos Reservas activas</p>
-                <div th:replace="~{fragments :: reservas-table-empleado}"></div>
+                <p>Perfil</p>
+                <div th:replace="~{fragments :: empleado-perfil(${empleado})}"></div>
+                <p style="color: #a7288a">Para cambiar los datos, comuníquese con el administrador.</p>
+                <div style="margin-top: 15px;text-align: center; color: #a7288a;">
+                    <a href="/empleado/reservas" class="btn">Cerrar</a>
+                </div>
             </div>
         </div>
     </main>

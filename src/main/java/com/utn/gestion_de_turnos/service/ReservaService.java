@@ -48,7 +48,7 @@ public class ReservaService {
         String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
 
 
-        Event evento = googleCalendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFinal);
+        Event evento = googleCalendarService.crearEventoSimple(resumen, descripcion, reserva.getFechaInicio(),reserva.getFechaFinal());
 
         // Guardar el ID del evento en la reserva
         reserva.setGoogleEventId(evento.getId());

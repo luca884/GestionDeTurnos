@@ -1,6 +1,8 @@
 package com.utn.gestion_de_turnos.API_Calendar.Controller;
 
 
+import com.google.api.services.calendar.Calendar;
+import com.utn.gestion_de_turnos.API_Calendar.Factory.GoogleCalendarClientFactory;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.google.api.services.calendar.model.Event;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
@@ -30,11 +32,18 @@ public class GoogleCalendarController {
             @RequestParam String resumen,
             @RequestParam String descripcion,
             @RequestParam LocalDateTime fechaInicio,
-            @RequestParam LocalDateTime fechaFin
+            @RequestParam LocalDateTime fechaFin,
+            Authentication authentication
     ) throws Exception {
-        googleCalendarService.crearEventoSimple(resumen, descripcion, fechaInicio, fechaFin);
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        String accessToken = user.getAccessToken(); // Suponiendo que lo guardás
+
+        Calendar calendar = GoogleCalendarClientFactory.createCalendarClient(accessToken);
+
+        googleCalendarService.crearEventoSimple(calendar, resumen, descripcion, fechaInicio, fechaFin);
         return "✅ Evento creado correctamente.";
     }
+
 
     // 📌 Endpoint para empleados (ver todos los eventos con detalle)
     @GetMapping("/empleado")

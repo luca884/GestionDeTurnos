@@ -24,17 +24,11 @@ import java.util.stream.Collectors;
 @Service
 public class GoogleCalendarService {
 
-    private final Calendar calendar;
-
-    @Autowired
-    public GoogleCalendarService(Calendar calendar) {
-        this.calendar = calendar;
-    }
 
     private ReservaRepository reservaRepository;
 
 
-    public Event crearEventoSimple(String resumen, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin)
+    public Event crearEventoSimple(Calendar calendar,String resumen, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin)
             throws IOException {
 
         // Convertir LocalDateTime a java.util.Date
@@ -87,7 +81,7 @@ public class GoogleCalendarService {
 
 
 
-    public List<Event> listarTodosLosEventos() throws IOException {
+    public List<Event> listarTodosLosEventos(Calendar calendar) throws IOException {
         Events events = calendar.events().list("primary")
                 .setMaxResults(100)
                 .setOrderBy("startTime")
@@ -97,8 +91,8 @@ public class GoogleCalendarService {
         return events.getItems(); // Devuelve lista completa para empleados
     }
 
-    public List<Event> listarEventosParaCliente(String emailCliente) throws IOException {
-        List<Event> todosLosEventos = listarTodosLosEventos();
+    public List<Event> listarEventosParaCliente(Calendar calendar, String emailCliente) throws IOException {
+        List<Event> todosLosEventos = listarTodosLosEventos(calendar);
         List<Event> eventosFiltrados = new ArrayList<>();
 
         for (Event event : todosLosEventos) {
@@ -150,16 +144,16 @@ public class GoogleCalendarService {
         }
  */
 
-    public void borrarEventoPorId(String eventId) throws IOException {
+    public void borrarEventoPorId(Calendar calendar, String eventId) throws IOException {
         calendar.events().delete("primary", eventId).execute();
         System.out.println("🗑️ Evento eliminado con ID: " + eventId);
     }
 
-    public Event obtenerEventoPorId(String eventId) throws IOException {
+    public Event obtenerEventoPorId(Calendar calendar, String eventId) throws IOException {
         return calendar.events().get("primary", eventId).execute();
     }
 
-    public void listarCalendarios() throws IOException {
+    public void listarCalendarios(Calendar calendar) throws IOException {
         CalendarList calendarList = calendar.calendarList().list().execute();
         for (CalendarListEntry entry : calendarList.getItems()) {
             System.out.printf("📖 Nombre: %s | ID: %s\n", entry.getSummary(), entry.getId());

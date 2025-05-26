@@ -36,30 +36,12 @@ public class ReservaService {
     @Autowired
     private ReservaRepository reservaRepository;
     @Autowired
-    private ClienteRepository clienteRepository;
-    @Autowired
-    private SalaRepository salaRepository;
-    @Autowired
     private GoogleCalendarService googleCalendarService;
 
     @Transactional
-    public Reserva crearReserva(Long clienteId, Long salaId, LocalDateTime fechaInicio, LocalDateTime fechaFinal, Reserva.TipoPago tipoPago) throws IOException {
-        Cliente cliente = clienteRepository.findById(clienteId).orElseThrow(()->
-                new RuntimeException("Cliente no encontrado"));
-        Sala sala = salaRepository.findById(salaId).orElseThrow(()->
-                new RuntimeException("Sala no encontrada"));
-        List<Reserva> conflictingReservas = reservaRepository.findConflictingReservas(salaId, fechaInicio, fechaFinal);
-        if (!conflictingReservas.isEmpty()) {
-            throw new TiempoDeReservaOcupadoException("El turno se superpone con otro existente");
-        }
-
-        Reserva reserva = new Reserva();
-        reserva.setCliente(cliente);
-        reserva.setSala(sala);
-        reserva.setFechaInicio(fechaInicio);
-        reserva.setFechaFinal(fechaFinal);
-        reserva.setTipoPago(tipoPago);
-        reserva.setEstado(Reserva.Estado.ACTIVO);
+    public Reserva crearReserva(Reserva reserva) throws IOException {
+        // Guardás primero en la BDD sin el Google Event ID
+        Reserva reservaGuardada = reservaRepository.save(reserva);
 
         // Crear evento en Google Calendar
         String resumen = "Reserva de " + reserva.getCliente().getNombre();

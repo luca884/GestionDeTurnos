@@ -4,17 +4,21 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 import com.utn.gestion_de_turnos.model.Reserva;
+import com.utn.gestion_de_turnos.repository.ReservaRepository;
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
+import java.time.*;
 import java.util.Date;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +30,8 @@ public class GoogleCalendarService {
     public GoogleCalendarService(Calendar calendar) {
         this.calendar = calendar;
     }
+
+    private ReservaRepository reservaRepository;
 
 
     public Event crearEventoSimple(String resumen, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin)
@@ -55,6 +61,30 @@ public class GoogleCalendarService {
 
         return calendar.events().insert("primary", event).execute();
     }
+
+
+    public List<Reserva> buscarReservasConFiltros(
+            Optional<Long> salaId,
+            Optional<Long> clienteId,
+            Optional<LocalDate> fecha,
+            Optional<LocalDate> fechaInicio,
+            Optional<LocalDate> fechaFin,
+            Optional<DayOfWeek> diaSemana,
+            Optional<LocalTime> horaInicio,
+            Optional<LocalTime> horaFin
+    ) {
+        Specification<Reserva> spec = Specification.where(ReservaSpecification.hasSalaId(salaId))
+                .and(ReservaSpecification.hasClienteId(clienteId))
+                // solo usar fecha si no se usan fechas de rango
+                .and(fechaInicio.isEmpty() && fechaFin.isEmpty()
+                        ? ReservaSpecification.hasFecha(fecha)
+                        : ReservaSpecification.entreFechas(fechaInicio, fechaFin))
+                .and(ReservaSpecification.hasDiaSemana(diaSemana))
+                .and(ReservaSpecification.entreHoras(horaInicio, horaFin));
+
+        return reservaRepository.findAll(spec);
+    }
+
 
 
     public List<Event> listarTodosLosEventos() throws IOException {
@@ -89,6 +119,10 @@ public class GoogleCalendarService {
 
         return eventosFiltrados;
     }
+
+
+
+
 
 
 

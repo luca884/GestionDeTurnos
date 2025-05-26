@@ -3,9 +3,10 @@ package com.utn.gestion_de_turnos.API_Calendar.Controller;
 
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.google.api.services.calendar.model.Event;
+import com.utn.gestion_de_turnos.security.CustomUserDetails;
 import io.jsonwebtoken.io.IOException;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -48,9 +49,10 @@ public class GoogleCalendarController {
     }
 
     // 📌 Este Endpoint hace lo mismo que el metodo de arriba pero no hace falta pasarle el mail por paramentro ya sabe cual es cuando hace el login con Spring Security
-    @GetMapping("cliente ")
-    public List<Event> listarEventosDelClienteAutenticado(Authentication authentication) throws IOException, java.io.IOException {
-        String emailCliente = authentication.name(); // o getPrincipal().getUsername()
+    @GetMapping("cliente")
+    public List<Event> listarEventosDelClienteAutenticado(Authentication authentication) throws IOException, java.io.IOException { // El Authentication tiene que ser el Repository
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        String emailCliente = user.getUsername();
         return googleCalendarService.listarEventosParaCliente(emailCliente);
     }
 

@@ -1,6 +1,7 @@
 package com.utn.gestion_de_turnos.repository;
 
 import com.utn.gestion_de_turnos.model.Reserva;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,4 +31,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     @Query("SELECT r FROM Reserva r WHERE r.sala.id = :salaId AND r.estado = :estado")
     List<Reserva> findBySalaIdAndEstado(@Param("salaId") Long salaId,
                                         @Param("estado") Reserva.Estado estado);
+
+    List<Reserva> findAll(Specification<Reserva> spec);
 }

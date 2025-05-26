@@ -20,7 +20,7 @@ public class GoogleCalendarConfig {
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json"; // en resources
 
     @Bean
-    public Calendar googleCalendarService() throws IOException, GeneralSecurityException {
+    public Calendar googleCalendarClient() throws IOException, GeneralSecurityException {
         GoogleCredential credential = GoogleCredential.fromStream(
                         getClass().getResourceAsStream(CREDENTIALS_FILE_PATH))
                 .createScoped(Collections.singletonList("https://www.googleapis.com/auth/calendar"));

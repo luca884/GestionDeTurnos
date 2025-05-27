@@ -11,16 +11,19 @@ import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
 import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Sala;
+import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.ClienteRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
 import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.UsuarioRepository;
+import com.utn.gestion_de_turnos.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,7 +44,10 @@ public class ReservaService {
     private ReservaRepository reservaRepository;
     @Autowired
     private GoogleCalendarService googleCalendarService;
-
+    @Autowired
+    private ClienteRepository clienteRepository;
+    @Autowired
+    private SalaRepository salaRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
 
@@ -61,6 +67,25 @@ public class ReservaService {
         reserva.setGoogleEventId(evento.getId());
 
         // Guardar de nuevo en la base con el ID de Google
+        return reservaRepository.save(reserva);
+    }
+
+    public Reserva crearReserva(Long clienteId, Long salaId, LocalDateTime fechaInicio, LocalDateTime fechaFinal, Reserva.TipoPago tipoPago) {
+        Cliente cliente = clienteRepository.findById(clienteId).orElseThrow(()->
+                new RuntimeException("Cliente no encontrado"));
+        Sala sala = salaRepository.findById(salaId).orElseThrow(()->
+                new RuntimeException("Sala no encontrada"));
+        List<Reserva> conflictingReservas = reservaRepository.findConflictingReservas(salaId, fechaInicio, fechaFinal);
+        if (!conflictingReservas.isEmpty()) {
+            throw new TiempoDeReservaOcupadoException("El turno se superpone con otro existente");
+        }
+        Reserva reserva = new Reserva();
+        reserva.setCliente(cliente);
+        reserva.setSala(sala);
+        reserva.setFechaInicio(fechaInicio);
+        reserva.setFechaFinal(fechaFinal);
+        reserva.setTipoPago(tipoPago);
+        reserva.setEstado(Reserva.Estado.ACTIVO);
         return reservaRepository.save(reserva);
     }
 
@@ -106,12 +131,18 @@ public class ReservaService {
         return reservaRepository.findAll();
     }
 
+
+    public List<Reserva> findByAllActivas() {
+        return reservaRepository.findByEstado(Reserva.Estado.ACTIVO);
+    }
+
     public List<Reserva> findByEstado(Reserva.Estado estado) {
         return reservaRepository.findByEstado(estado);
     }
 
 
     public void cancelarReservaById(Long reservaId, Long clienteId) {
+  //  public void cancelarReservaPorCliente(Long reservaId, Long clienteId) {
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
 
@@ -141,6 +172,20 @@ public class ReservaService {
     }
 
 
+    public void cancelarReservaPorEmpleado(Long reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
+
+        if (reserva.getEstado() != Reserva.Estado.ACTIVO) {
+            throw new ReservaNoCancelableException("Solo se pueden cancelar reservas activas");
+        }
+
+        if (reserva.getFechaInicio().isBefore(LocalDateTime.now())) {
+            throw new ReservaNoCancelableException("No se puede cancelar una reserva que ya ha comenzado");
+        }
+        reserva.setEstado(Reserva.Estado.CANCELADO);
+        reservaRepository.save(reserva);
+    }
 
 
 }

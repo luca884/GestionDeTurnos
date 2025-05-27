@@ -24,9 +24,11 @@ public class Reserva {
     @JoinColumn(name = "sala_id", nullable = false)
     private Sala sala;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDateTime fechaInicio;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "fecha_final", nullable = false)
     private LocalDateTime fechaFinal;
 

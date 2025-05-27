@@ -67,6 +67,7 @@ public class AuthApiController {
         return ResponseEntity.ok(new JwtAuthenticationResponse(null, usuario.getRol().name()));
     }
 
+
     @PostMapping("/register")
     public ResponseEntity<?> registerCliente(@Valid @RequestBody Cliente cliente) {
         if (usuarioRepository.findByEmail(cliente.getEmail()).isPresent()) {

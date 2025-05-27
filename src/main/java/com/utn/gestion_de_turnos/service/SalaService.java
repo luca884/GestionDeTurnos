@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Service
 public class SalaService {
+
     @Autowired
     private SalaRepository salaRepository;
 

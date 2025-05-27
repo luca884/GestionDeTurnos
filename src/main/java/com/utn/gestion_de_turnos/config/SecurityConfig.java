@@ -1,6 +1,5 @@
 package com.utn.gestion_de_turnos.config;
 
-
 import com.utn.gestion_de_turnos.security.CustomUserDetailsService;
 import com.utn.gestion_de_turnos.security.JwtCookieAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +27,9 @@ public class SecurityConfig {
     @Autowired
     private JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter;
 
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
@@ -52,6 +54,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable);
         return http.build();
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -63,7 +66,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
-
 }

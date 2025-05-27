@@ -17,6 +17,6 @@ public interface SalaRepository extends JpaRepository<Sala,Long> {
             "SELECT r.sala.id FROM Reserva r WHERE " +
             "r.fechaInicio < :fechaFinal AND r.fechaFinal > :fechaInicio)")
     List<Sala> encontrarSalasDisponibles(@Param("fechaInicio") LocalDateTime fechaInicio,
-                                         @Param("fechaFinal") LocalDateTime fechaFinal);
+                                  @Param("fechaFinal") LocalDateTime fechaFinal);
 
 }

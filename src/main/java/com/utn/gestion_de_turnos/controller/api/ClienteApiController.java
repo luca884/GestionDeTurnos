@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-// Eso
+// Eso es un controlador REST para manejar las operaciones CRUD de la entidad Cliente.
 
 @RestController
 @RequestMapping("/api/cliente")
@@ -28,7 +28,7 @@ public class ClienteApiController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<Cliente> getAllClientes() {
         return clienteService.findAll();
     }

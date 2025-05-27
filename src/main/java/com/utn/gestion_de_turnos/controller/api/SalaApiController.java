@@ -74,6 +74,7 @@ public class SalaApiController {
         return ResponseEntity.ok(canDelete);
     }
 
+
     @GetMapping("/cliente/activas")
     public ResponseEntity<List<ReservaResponse>> getReservasActivasCliente(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -95,6 +96,7 @@ public class SalaApiController {
 
         return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/update")
     public String updateSalaDescription(

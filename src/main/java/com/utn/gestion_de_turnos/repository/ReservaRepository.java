@@ -33,4 +33,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
                                         @Param("estado") Reserva.Estado estado);
 
     List<Reserva> findAll(Specification<Reserva> spec);
+
+    List<Reserva> findByUsuarioId(Long id);
 }

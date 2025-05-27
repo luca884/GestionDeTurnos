@@ -1,86 +1,73 @@
+// GoogleCalendarController.java
 package com.utn.gestion_de_turnos.API_Calendar.Controller;
 
 
-import com.google.api.services.calendar.Calendar;
-import com.utn.gestion_de_turnos.API_Calendar.Factory.GoogleCalendarClientFactory;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
-import com.google.api.services.calendar.model.Event;
-import com.utn.gestion_de_turnos.security.CustomUserDetails;
-import io.jsonwebtoken.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/calendar")
 public class GoogleCalendarController {
 
-    private final GoogleCalendarService googleCalendarService;
-
     @Autowired
-    public GoogleCalendarController(GoogleCalendarService googleCalendarService) {
-        this.googleCalendarService = googleCalendarService;
+    private GoogleCalendarService calendarService;
+
+    @PostMapping("/crear")
+    public String crearEvento(@RequestParam String titulo,
+                              @RequestParam String descripcion,
+                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
+                              @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
+        try {
+            Event evento = calendarService.crearEventoConReserva(titulo, descripcion, inicio, fin);
+            return "Evento creado con ID: " + evento.getId();
+        } catch (IOException e) {
+            return "Error al crear evento: " + e.getMessage();
+        }
     }
 
-    @PostMapping("/events")
-    public String crearEvento(
-            @RequestParam String resumen,
-            @RequestParam String descripcion,
-            @RequestParam LocalDateTime fechaInicio,
-            @RequestParam LocalDateTime fechaFin,
-            Authentication authentication
-    ) throws Exception {
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        String accessToken = user.getAccessToken(); // Suponiendo que lo guardás
-
-        Calendar calendar = GoogleCalendarClientFactory.createCalendarClient(accessToken);
-
-        googleCalendarService.crearEventoSimple(calendar, resumen, descripcion, fechaInicio, fechaFin);
-        return "✅ Evento creado correctamente.";
+    @GetMapping("/listar")
+    public List<Event> listarEventos() throws Exception {
+        return calendarService.listarEventos();
     }
 
-
-    // 📌 Endpoint para empleados (ver todos los eventos con detalle)
-    @GetMapping("/empleado")
-    public List<Event> verTodosLosEventosEmpleado() throws IOException, java.io.IOException {
-        return googleCalendarService.listarTodosLosEventos();
+    @GetMapping("/buscar")
+    public Event obtenerEventoPorId(@RequestParam String id) throws IOException {
+        return calendarService.obtenerEventoPorId(id);
     }
 
-    // 📌 Endpoint para clientes (ver solo sus eventos + "ocupado")
-    @GetMapping("/cliente")
-    public List<Event> verEventosCliente(@RequestParam String email) throws IOException, java.io.IOException {
-        return googleCalendarService.listarEventosParaCliente(email);
+    @DeleteMapping("/eliminar")
+    public String eliminarEvento(@RequestParam String id) {
+        try {
+            calendarService.eliminarEvento(id);
+            return "Evento eliminado correctamente.";
+        } catch (Exception e) {
+            return "Error al eliminar evento: " + e.getMessage();
+        }
     }
 
-    // 📌 Este Endpoint hace lo mismo que el metodo de arriba pero no hace falta pasarle el mail por paramentro ya sabe cual es cuando hace el login con Spring Security
-    @GetMapping("cliente")
-    public List<Event> listarEventosDelClienteAutenticado(Authentication authentication) throws IOException, java.io.IOException { // El Authentication tiene que ser el Repository
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        String emailCliente = user.getUsername();
-        return googleCalendarService.listarEventosParaCliente(emailCliente);
+    @PutMapping("/modificar")
+    public String modificarEvento(@RequestParam String id,
+                                  @RequestParam String titulo,
+                                  @RequestParam String descripcion) {
+        try {
+            calendarService.modificarEvento(id, titulo, descripcion);
+            return "Evento modificado correctamente.";
+        } catch (Exception e) {
+            return "Error al modificar evento: " + e.getMessage();
+        }
     }
 
-
-
-    @DeleteMapping("/events/{eventId}")
-    public String borrarEvento(@PathVariable String eventId) throws Exception {
-        googleCalendarService.borrarEventoPorId(eventId);
-        return "🗑️ Evento eliminado con ID: " + eventId;
-    }
-
-    @GetMapping("/events/{eventId}")
-    public Event obtenerEventoPorId(@PathVariable String eventId) throws Exception {
-        return googleCalendarService.obtenerEventoPorId(eventId);
-    }
-
-    @GetMapping("/calendars")
-    public String listarCalendarios() throws Exception {
-        googleCalendarService.listarCalendarios();
-        return "📚 Lista de calendarios mostrada por consola.";
+    @GetMapping("/filtrar")
+    public List<Event> filtrarEventos(@RequestParam(required = false) Long idSala,
+                                      @RequestParam(required = false) Long idCliente,
+                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) throws IOException {
+        return calendarService.filtrarEventos(idSala, idCliente, fecha);
     }
 }

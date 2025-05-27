@@ -1,22 +1,23 @@
+// GoogleCalendarService.java
 package com.utn.gestion_de_turnos.API_Calendar.Service;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.*;
 import com.utn.gestion_de_turnos.model.Reserva;
+import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
-import org.hibernate.validator.constraints.UUID;
+import com.utn.gestion_de_turnos.repository.UsuarioRepository;
+import com.utn.gestion_de_turnos.API_Calendar.Factory.GoogleCalendarClientFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.io.IOException;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,139 +25,134 @@ import java.util.stream.Collectors;
 @Service
 public class GoogleCalendarService {
 
-
+    @Autowired
     private ReservaRepository reservaRepository;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    public Event crearEventoSimple(Calendar calendar,String resumen, String descripcion, LocalDateTime fechaInicio, LocalDateTime fechaFin)
-            throws IOException {
+    @Autowired
+    private GoogleCalendarClientFactory calendarClientFactory;
 
-        // Convertir LocalDateTime a java.util.Date
-        Date inicioDate =  Date.from(fechaInicio.atZone(ZoneId.of("America/Argentina/Buenos_Aires")).toInstant());
-        Date finDate =  Date.from(fechaFin.atZone(ZoneId.of("America/Argentina/Buenos_Aires")).toInstant());
+    private Calendar getCalendar() throws Exception {
+        return calendarClientFactory.getCalendarService();
+    }
 
-        // Convertir java.util.Date a DateTime (de la API de Google)
-        DateTime fechaInicioGoogle = new DateTime(inicioDate);
-        DateTime fechaFinGoogle = new DateTime(finDate);
+    public Event crearEventoConReserva(String resumen, String descripcion, LocalDateTime inicio, LocalDateTime fin) throws IOException {
+        Calendar calendar = getCalendar();
 
         Event event = new Event()
                 .setSummary(resumen)
-                .setDescription(descripcion);
+                .setDescription(descripcion)
+                .setStart(new EventDateTime()
+                        .setDateTime(new DateTime(Date.from(inicio.atZone(ZoneId.systemDefault()).toInstant())))
+                        .setTimeZone("America/Argentina/Buenos_Aires"))
+                .setEnd(new EventDateTime()
+                        .setDateTime(new DateTime(Date.from(fin.atZone(ZoneId.systemDefault()).toInstant())))
+                        .setTimeZone("America/Argentina/Buenos_Aires"));
 
-        EventDateTime start = new EventDateTime()
-                .setDateTime(fechaInicioGoogle)
-                .setTimeZone("America/Argentina/Buenos_Aires");
-        event.setStart(start);
+        Event createdEvent = calendar.events().insert("primary", event).execute();
 
-        EventDateTime end = new EventDateTime()
-                .setDateTime(fechaFinGoogle)
-                .setTimeZone("America/Argentina/Buenos_Aires");
-        event.setEnd(end);
+        Reserva reserva = new Reserva();
+        reserva.setTitulo(resumen);
+        reserva.setDescripcion(descripcion);
+        reserva.setInicio(inicio);
+        reserva.setFin(fin);
+        reserva.setGoogleEventId(createdEvent.getId());
+        reserva.setUsuario(getUsuarioActual());
+        reservaRepository.save(reserva);
 
-        return calendar.events().insert("primary", event).execute();
+        return createdEvent;
     }
 
-
-    public List<Reserva> buscarReservasConFiltros(
-            Optional<Long> salaId,
-            Optional<Long> clienteId,
-            Optional<LocalDate> fecha,
-            Optional<LocalDate> fechaInicio,
-            Optional<LocalDate> fechaFin,
-            Optional<DayOfWeek> diaSemana,
-            Optional<LocalTime> horaInicio,
-            Optional<LocalTime> horaFin
-    ) {
-        Specification<Reserva> spec = Specification.where(ReservaSpecification.hasSalaId(salaId))
-                .and(ReservaSpecification.hasClienteId(clienteId))
-                // solo usar fecha si no se usan fechas de rango
-                .and(fechaInicio.isEmpty() && fechaFin.isEmpty()
-                        ? ReservaSpecification.hasFecha(fecha)
-                        : ReservaSpecification.entreFechas(fechaInicio, fechaFin))
-                .and(ReservaSpecification.hasDiaSemana(diaSemana))
-                .and(ReservaSpecification.entreHoras(horaInicio, horaFin));
-
-        return reservaRepository.findAll(spec);
-    }
-
-
-
-    public List<Event> listarTodosLosEventos(Calendar calendar) throws IOException {
-        Events events = calendar.events().list("primary")
-                .setMaxResults(100)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-
-        return events.getItems(); // Devuelve lista completa para empleados
-    }
-
-    public List<Event> listarEventosParaCliente(Calendar calendar, String emailCliente) throws IOException {
-        List<Event> todosLosEventos = listarTodosLosEventos(calendar);
-        List<Event> eventosFiltrados = new ArrayList<>();
-
-        for (Event event : todosLosEventos) {
-            String descripcion = event.getDescription() != null ? event.getDescription() : "";
-
-            if (descripcion.contains("EmailCliente: " + emailCliente)) {
-                // Mostrar evento completo si es del cliente
-                eventosFiltrados.add(event);
-            } else {
-                // Mostrar como ocupado si no es del cliente
-                Event eventoOculto = new Event()
-                        .setSummary("No disponible")
-                        .setStart(event.getStart())
-                        .setEnd(event.getEnd());
-                eventosFiltrados.add(eventoOculto);
-            }
-        }
-
-        return eventosFiltrados;
-    }
-
-
-
-
-
-
-
-
-/*    public Events listarProximosEventos() throws IOException {
-        Events events = calendar.events().list("primary")
-                .setMaxResults(10)
-                .setOrderBy("startTime")
-                .setSingleEvents(true)
-                .execute();
-
+    public List<Event> listarEventos() throws Exception {
+        Calendar calendar = getCalendar();
+        Events events = calendar.events().list("primary").execute();
         List<Event> items = events.getItems();
-        if (items.isEmpty()) {
-            System.out.println("📭 No hay eventos próximos.");
-        } else {
-            for (Event event : items) {
-                String resumen = event.getSummary();
-                String inicio = event.getStart().getDateTime() != null ?
-                        event.getStart().getDateTime().toString() :
-                        event.getStart().getDate().toString();
-                System.out.printf("📌 %s (Inicio: %s) | ID: %s\n", resumen, inicio, event.getId());
+        Usuario actual = getUsuarioActual();
+
+        if (actual.getRol().equals("CLIENTE")) {
+            return items.stream()
+                    .filter(event -> reservaRepository.findByGoogleEventId(event.getId())
+                            .map(r -> r.getUsuario().getId().equals(actual.getId()))
+                            .orElse(false))
+                    .collect(Collectors.toList());
+        }
+        return items;
+    }
+
+    public List<Event> filtrarEventos(Long idSala, Long idCliente, LocalDate fecha) throws Exception {
+        Calendar calendar = getCalendar();
+        List<Reserva> reservasFiltradas = reservaRepository.findAll().stream()
+                .filter(reserva -> (idSala == null || (reserva.getSala() != null && reserva.getSala().getId().equals(idSala)))
+                        && (idCliente == null || reserva.getUsuario().getId().equals(idCliente))
+                        && (fecha == null || reserva.getInicio().toLocalDate().equals(fecha)))
+                .collect(Collectors.toList());
+
+        List<String> idsEventos = reservasFiltradas.stream()
+                .map(Reserva::getGoogleEventId)
+                .collect(Collectors.toList());
+
+        Events allEvents = calendar.events().list("primary").execute();
+
+        return allEvents.getItems().stream()
+                .filter(event -> idsEventos.contains(event.getId()))
+                .collect(Collectors.toList());
+    }
+
+    public void eliminarEvento(String idEvento) throws Exception {
+        Calendar calendar = getCalendar();
+        Optional<Reserva> reservaOpt = reservaRepository.findByGoogleEventId(idEvento);
+
+        if (reservaOpt.isPresent()) {
+            Reserva reserva = reservaOpt.get();
+            Usuario actual = getUsuarioActual();
+            if (actual.getRol().equals("CLIENTE") && !reserva.getUsuario().getId().equals(actual.getId())) {
+                throw new SecurityException("No puedes eliminar reservas de otros usuarios");
+            }
+            reservaRepository.delete(reserva);
+        }
+        calendar.events().delete("primary", idEvento).execute();
+    }
+
+    public void modificarEvento(String idEvento, String nuevoTitulo, String nuevaDescripcion) throws Exception {
+        Calendar calendar = getCalendar();
+        Event event = calendar.events().get("primary", idEvento).execute();
+        event.setSummary(nuevoTitulo);
+        event.setDescription(nuevaDescripcion);
+
+        Optional<Reserva> reservaOpt = reservaRepository.findByGoogleEventId(idEvento);
+        if (reservaOpt.isPresent()) {
+            Reserva reserva = reservaOpt.get();
+            Usuario actual = getUsuarioActual();
+            if (actual.getRol().equals("CLIENTE") && !reserva.getUsuario().getId().equals(actual.getId())) {
+                throw new SecurityException("No puedes modificar reservas de otros usuarios");
+            }
+            reserva.setTitulo(nuevoTitulo);
+            reserva.setDescripcion(nuevaDescripcion);
+            reservaRepository.save(reserva);
+        }
+        calendar.events().update("primary", idEvento, event).execute();
+    }
+
+    public Event obtenerEventoPorId(String idEvento) throws IOException {
+        Calendar calendar = getCalendar();
+        Event event = calendar.events().get("primary", idEvento).execute();
+
+        Usuario actual = getUsuarioActual();
+        Optional<Reserva> reservaOpt = reservaRepository.findByGoogleEventId(idEvento);
+
+        if (actual.getRol().equals("CLIENTE") && reservaOpt.isPresent()) {
+            Reserva reserva = reservaOpt.get();
+            if (!reserva.getUsuario().getId().equals(actual.getId())) {
+                throw new SecurityException("No puedes acceder a eventos de otros usuarios");
             }
         }
-        return events;
-        }
- */
-
-    public void borrarEventoPorId(Calendar calendar, String eventId) throws IOException {
-        calendar.events().delete("primary", eventId).execute();
-        System.out.println("🗑️ Evento eliminado con ID: " + eventId);
+        return event;
     }
 
-    public Event obtenerEventoPorId(Calendar calendar, String eventId) throws IOException {
-        return calendar.events().get("primary", eventId).execute();
-    }
-
-    public void listarCalendarios(Calendar calendar) throws IOException {
-        CalendarList calendarList = calendar.calendarList().list().execute();
-        for (CalendarListEntry entry : calendarList.getItems()) {
-            System.out.printf("📖 Nombre: %s | ID: %s\n", entry.getSummary(), entry.getId());
-        }
+    private Usuario getUsuarioActual() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return usuarioRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 }

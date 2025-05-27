@@ -11,11 +11,15 @@ import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
 import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Sala;
+import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.ClienteRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
 import com.utn.gestion_de_turnos.repository.SalaRepository;
+import com.utn.gestion_de_turnos.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,6 +42,9 @@ public class ReservaService {
     @Autowired
     private GoogleCalendarService googleCalendarService;
 
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     @Transactional
     public Reserva crearReserva(Reserva reserva) throws IOException {
         // Guardás primero en la BDD sin el Google Event ID
@@ -57,6 +64,35 @@ public class ReservaService {
         return reservaRepository.save(reserva);
     }
 
+
+
+    public List<Reserva> listarTodas() {
+        return reservaRepository.findAll();
+    }
+
+    public List<Reserva> listarPorUsuarioActual() {
+        Usuario usuario = obtenerUsuarioActual();
+        return reservaRepository.findByUsuarioId(usuario.getId());
+    }
+
+    public Reserva buscarPorId(Long id) {
+        return reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + id));
+    }
+
+    public void eliminar(Long id) {
+        reservaRepository.deleteById(id);
+    }
+
+    public void modificar(Reserva reserva) {
+        reservaRepository.save(reserva);
+    }
+
+    private Usuario obtenerUsuarioActual() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado por email: " + email));
+    }
 
     public List<Reserva> findActiveByClienteId(Long clienteId) {
         return reservaRepository.findByClienteIdAndEstado(clienteId, Reserva.Estado.ACTIVO);

@@ -1,6 +1,9 @@
 package com.utn.gestion_de_turnos.service;
 
+import com.fasterxml.jackson.databind.deser.CreatorProperty;
+import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Empleado;
+import com.utn.gestion_de_turnos.repository.ClienteRepository;
 import com.utn.gestion_de_turnos.repository.EmpleadoRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,9 @@ public class EmpleadoService {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
 
     public Empleado save(Empleado empleado) {
         if (empleado == null) {
@@ -54,6 +60,12 @@ public class EmpleadoService {
 
         return empleado;
     }
+
+    public List<Cliente> findAllClientes(){
+        return clienteRepository.findAll();
+    }
+
+
 
     public Empleado login(String email, String contrasena) {
         Empleado empleado = empleadoRepository.findByEmail(email);

@@ -20,7 +20,7 @@ public class GoogleCalendarController {
     @Autowired
     private GoogleCalendarService calendarService;
 
-    @PostMapping("/crear")
+   /* @PostMapping("/crear")
     public String crearEvento(@RequestParam String titulo,
                               @RequestParam String descripcion,
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
@@ -31,20 +31,12 @@ public class GoogleCalendarController {
             return "Evento creado con ID: " + evento.getId();
         } catch (IOException e) {
             return "Error al crear evento: " + e.getMessage();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-    }
+    }*/
 
-    @GetMapping("/listar")
-    public List<Event> listarEventos() throws Exception {
-        return calendarService.listarEventos();
-    }
-
-    @GetMapping("/buscar")
-    public Event obtenerEventoPorId(@RequestParam String id) throws IOException {
-        return calendarService.obtenerEventoPorId(id);
-    }
-
-    @DeleteMapping("/eliminar")
+   /* @DeleteMapping("/eliminar")
     public String eliminarEvento(@RequestParam String id) {
         try {
             calendarService.eliminarEvento(id);
@@ -52,9 +44,9 @@ public class GoogleCalendarController {
         } catch (Exception e) {
             return "Error al eliminar evento: " + e.getMessage();
         }
-    }
+    } */
 
-    @PutMapping("/modificar")
+  /*  @PutMapping("/modificar")
     public String modificarEvento(@RequestParam String id,
                                   @RequestParam String titulo,
                                   @RequestParam String descripcion) {
@@ -64,7 +56,7 @@ public class GoogleCalendarController {
         } catch (Exception e) {
             return "Error al modificar evento: " + e.getMessage();
         }
-    }
+    } */
 
     @GetMapping("/filtrar")
     public List<Event> filtrarEventos(@RequestParam(required = false) Long idSala,
@@ -72,4 +64,15 @@ public class GoogleCalendarController {
                                       @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) throws Exception {
         return calendarService.filtrarEventos(idSala, idCliente, fecha);
     }
+
+    @GetMapping("/listar")
+    public List<Event> listarEventos() throws Exception {
+        return calendarService.listarEventos();
+    }
+
+    @GetMapping("/buscar")
+    public Event obtenerEventoPorId(@RequestParam String id) throws Exception {
+        return calendarService.obtenerEventoPorId(id);
+    }
+
 }

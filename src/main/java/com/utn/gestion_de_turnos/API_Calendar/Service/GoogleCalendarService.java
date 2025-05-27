@@ -53,15 +53,6 @@ public class GoogleCalendarService {
 
         Event createdEvent = calendar.events().insert("primary", event).execute();
 
-        Reserva reserva = new Reserva();
-        reserva.setTitulo(resumen);
-        reserva.setDescripcion(descripcion);
-        reserva.setInicio(inicio);
-        reserva.setFin(fin);
-        reserva.setGoogleEventId(createdEvent.getId());
-        reserva.setUsuario(getUsuarioActual());
-        reservaRepository.save(reserva);
-
         return createdEvent;
     }
 
@@ -74,7 +65,7 @@ public class GoogleCalendarService {
         if (actual.getRol().equals("CLIENTE")) {
             return items.stream()
                     .filter(event -> reservaRepository.findByGoogleEventId(event.getId())
-                            .map(r -> r.getUsuario().getId().equals(actual.getId()))
+                            .map(r -> r.getCliente().getId().equals(actual.getId()))
                             .orElse(false))
                     .collect(Collectors.toList());
         }
@@ -85,8 +76,8 @@ public class GoogleCalendarService {
         Calendar calendar = getCalendar();
         List<Reserva> reservasFiltradas = reservaRepository.findAll().stream()
                 .filter(reserva -> (idSala == null || (reserva.getSala() != null && reserva.getSala().getId().equals(idSala)))
-                        && (idCliente == null || reserva.getUsuario().getId().equals(idCliente))
-                        && (fecha == null || reserva.getInicio().toLocalDate().equals(fecha)))
+                        && (idCliente == null || reserva.getCliente().getId().equals(idCliente))
+                        && (fecha == null || reserva.getFechaInicio().toLocalDate().equals(fecha)))
                 .collect(Collectors.toList());
 
         List<String> idsEventos = reservasFiltradas.stream()
@@ -101,41 +92,49 @@ public class GoogleCalendarService {
     }
 
     public void eliminarEvento(String idEvento) throws Exception {
-        Calendar calendar = getCalendar();
         Optional<Reserva> reservaOpt = reservaRepository.findByGoogleEventId(idEvento);
 
-        if (reservaOpt.isPresent()) {
-            Reserva reserva = reservaOpt.get();
-            Usuario actual = getUsuarioActual();
-            if (actual.getRol().equals("CLIENTE") && !reserva.getUsuario().getId().equals(actual.getId())) {
-                throw new SecurityException("No puedes eliminar reservas de otros usuarios");
-            }
-            reservaRepository.delete(reserva);
+        if (reservaOpt.isEmpty()) {
+            throw new IllegalArgumentException("No existe una reserva asociada a este evento");
         }
+
+        Reserva reserva = reservaOpt.get();
+        Usuario actual = getUsuarioActual();
+
+        if (actual.getRol().equals("CLIENTE") && !reserva.getCliente().getId().equals(actual.getId())) {
+            throw new SecurityException("No puedes eliminar reservas de otros usuarios");
+        }
+
+        Calendar calendar = getCalendar();
         calendar.events().delete("primary", idEvento).execute();
     }
 
-    public void modificarEvento(String idEvento, String nuevoTitulo, String nuevaDescripcion) throws Exception {
+
+    public void modificarEvento(String idEvento, String nuevoTitulo, String nuevaDescripcion, LocalDateTime inicio, LocalDateTime fin) throws Exception {
         Calendar calendar = getCalendar();
         Event event = calendar.events().get("primary", idEvento).execute();
         event.setSummary(nuevoTitulo);
         event.setDescription(nuevaDescripcion);
+        event.setStart(new EventDateTime()
+                .setDateTime(new DateTime(Date.from(inicio.atZone(ZoneId.systemDefault()).toInstant())))
+                .setTimeZone("America/Argentina/Buenos_Aires"));
+        event.setEnd(new EventDateTime()
+                        .setDateTime(new DateTime(Date.from(fin.atZone(ZoneId.systemDefault()).toInstant())))
+                        .setTimeZone("America/Argentina/Buenos_Aires"));
 
         Optional<Reserva> reservaOpt = reservaRepository.findByGoogleEventId(idEvento);
         if (reservaOpt.isPresent()) {
             Reserva reserva = reservaOpt.get();
             Usuario actual = getUsuarioActual();
-            if (actual.getRol().equals("CLIENTE") && !reserva.getUsuario().getId().equals(actual.getId())) {
+            if (actual.getRol().equals("CLIENTE") && !reserva.getCliente().getId().equals(actual.getId())) { // verifica que el unico caso que no se puede modificar es si es un CLIENTE pero no es su reserva
                 throw new SecurityException("No puedes modificar reservas de otros usuarios");
             }
-            reserva.setTitulo(nuevoTitulo);
-            reserva.setDescripcion(nuevaDescripcion);
-            reservaRepository.save(reserva);
+
         }
         calendar.events().update("primary", idEvento, event).execute();
     }
 
-    public Event obtenerEventoPorId(String idEvento) throws IOException {
+    public Event obtenerEventoPorId(String idEvento) throws Exception {
         Calendar calendar = getCalendar();
         Event event = calendar.events().get("primary", idEvento).execute();
 
@@ -144,7 +143,7 @@ public class GoogleCalendarService {
 
         if (actual.getRol().equals("CLIENTE") && reservaOpt.isPresent()) {
             Reserva reserva = reservaOpt.get();
-            if (!reserva.getUsuario().getId().equals(actual.getId())) {
+            if (!reserva.getCliente().getId().equals(actual.getId())) {
                 throw new SecurityException("No puedes acceder a eventos de otros usuarios");
             }
         }

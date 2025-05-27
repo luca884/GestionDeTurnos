@@ -18,6 +18,7 @@ import com.utn.gestion_de_turnos.repository.ReservaRepository;
 import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.UsuarioRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
@@ -52,25 +53,7 @@ public class ReservaService {
     private UsuarioRepository usuarioRepository;
 
     @Transactional
-    public Reserva crearReserva(Reserva reserva) throws IOException {
-        // Guardás primero en la BDD sin el Google Event ID
-        Reserva reservaGuardada = reservaRepository.save(reserva);
-
-        // Crear evento en Google Calendar
-        String resumen = "Reserva de " + reserva.getCliente().getNombre();
-        String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
-
-
-        Event evento = googleCalendarService.crearEventoSimple(resumen, descripcion, reserva.getFechaInicio(),reserva.getFechaFinal());
-
-        // Guardar el ID del evento en la reserva
-        reserva.setGoogleEventId(evento.getId());
-
-        // Guardar de nuevo en la base con el ID de Google
-        return reservaRepository.save(reserva);
-    }
-
-    public Reserva crearReserva(Long clienteId, Long salaId, LocalDateTime fechaInicio, LocalDateTime fechaFinal, Reserva.TipoPago tipoPago) {
+    public Reserva crearReserva(Long clienteId, Long salaId, LocalDateTime fechaInicio, LocalDateTime fechaFinal, Reserva.TipoPago tipoPago) throws Exception {
         Cliente cliente = clienteRepository.findById(clienteId).orElseThrow(()->
                 new RuntimeException("Cliente no encontrado"));
         Sala sala = salaRepository.findById(salaId).orElseThrow(()->
@@ -86,6 +69,21 @@ public class ReservaService {
         reserva.setFechaFinal(fechaFinal);
         reserva.setTipoPago(tipoPago);
         reserva.setEstado(Reserva.Estado.ACTIVO);
+
+        reservaRepository.save(reserva);
+
+        // Crear evento en Google Calendar
+        String titulo = "Reserva de " + reserva.getCliente().getNombre();
+        String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
+
+
+        Event evento = googleCalendarService.crearEventoConReserva(titulo, descripcion, reserva.getFechaInicio(),reserva.getFechaFinal());
+
+        // Guardar el ID del evento en la reserva
+        reserva.setGoogleEventId(evento.getId());
+
+        // Guardar de nuevo en la base con el ID de Google
+
         return reservaRepository.save(reserva);
     }
 
@@ -105,12 +103,30 @@ public class ReservaService {
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + id));
     }
 
-    public void eliminar(Long id) {
-        reservaRepository.deleteById(id);
+    public void eliminar(Long id) throws Exception {
+
+        if (reservaRepository.existsById(id)) {
+            Optional<Reserva> reserva = reservaRepository.findById(id);
+            googleCalendarService.eliminarEvento(reserva.get().getGoogleEventId());
+            reservaRepository.deleteById(id);
+        }
+        else{
+            throw new IllegalArgumentException("La reserva no existe");
+        }
     }
 
-    public void modificar(Reserva reserva) {
-        reservaRepository.save(reserva);
+
+    public void modificar(Reserva reserva) throws Exception {
+        if (reservaRepository.existsById(reserva.getId())) {
+            reservaRepository.save(reserva);
+            // Modificar evento en Google Calendar
+            String titulo = "Reserva de " + reserva.getCliente().getNombre();
+            String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
+
+            googleCalendarService.modificarEvento(reserva.getGoogleEventId(), titulo, descripcion, reserva.getFechaInicio(), reserva.getFechaFinal());
+        } else {
+            throw new EntityNotFoundException("La reserva no existe");
+        }
     }
 
     private Usuario obtenerUsuarioActual() {
@@ -141,8 +157,8 @@ public class ReservaService {
     }
 
 
-    public void cancelarReservaById(Long reservaId, Long clienteId) {
-  //  public void cancelarReservaPorCliente(Long reservaId, Long clienteId) {
+    public void cancelarReservaPorCliente(Long reservaId, Long clienteId) {
+
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
 

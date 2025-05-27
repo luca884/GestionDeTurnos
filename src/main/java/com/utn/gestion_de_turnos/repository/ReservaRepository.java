@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByEstado(Reserva.Estado estado);
@@ -17,6 +18,8 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByClienteIdAndEstado(Long clienteId, Reserva.Estado estado);
 
     List<Reserva> findBySalaId(Long salaId);
+
+    Optional<Reserva> findByGoogleEventId(String eventId);
 
 
     @Query("SELECT t FROM Reserva t WHERE t.sala.id = :salaId AND t.estado = 'ACTIVO' AND " +

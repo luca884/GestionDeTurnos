@@ -38,7 +38,7 @@ public class GoogleCalendarService {
         return calendarClientFactory.getCalendarService();
     }
 
-    public Event crearEventoConReserva(String resumen, String descripcion, LocalDateTime inicio, LocalDateTime fin) throws IOException {
+    public Event crearEventoConReserva(String resumen, String descripcion, LocalDateTime inicio, LocalDateTime fin) throws Exception {
         Calendar calendar = getCalendar();
 
         Event event = new Event()

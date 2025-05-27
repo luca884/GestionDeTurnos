@@ -2,6 +2,7 @@
 package com.utn.gestion_de_turnos.API_Calendar.Controller;
 
 
+import com.google.api.services.calendar.model.Event;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,7 +26,8 @@ public class GoogleCalendarController {
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime inicio,
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fin) {
         try {
-            Event evento = calendarService.crearEventoConReserva(titulo, descripcion, inicio, fin);
+            Event evento;
+            evento = calendarService.crearEventoConReserva(titulo, descripcion, inicio, fin);
             return "Evento creado con ID: " + evento.getId();
         } catch (IOException e) {
             return "Error al crear evento: " + e.getMessage();
@@ -67,7 +69,7 @@ public class GoogleCalendarController {
     @GetMapping("/filtrar")
     public List<Event> filtrarEventos(@RequestParam(required = false) Long idSala,
                                       @RequestParam(required = false) Long idCliente,
-                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) throws IOException {
+                                      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fecha) throws Exception {
         return calendarService.filtrarEventos(idSala, idCliente, fecha);
     }
 }

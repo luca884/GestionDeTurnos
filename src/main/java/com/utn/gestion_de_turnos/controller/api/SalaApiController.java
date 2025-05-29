@@ -54,7 +54,6 @@ public class SalaApiController {
         return salaService.findAll();
     }
 
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSalaById(@PathVariable Long id) {
         try {
@@ -115,6 +114,18 @@ public class SalaApiController {
         } else {
             redirectAttributes.addFlashAttribute("error", "Sala no encontrada");
             return "redirect:/admin/salas/update?id=" + id;
+        }
+    }
+
+    public static class SalaDisponibilidadUpdateRequest {
+        private boolean disponibilidad;
+
+        public boolean isDisponibilidad() {
+            return disponibilidad;
+        }
+
+        public void setDisponibilidad(boolean disponibilidad) {
+            this.disponibilidad = disponibilidad;
         }
     }
 

@@ -20,4 +20,3 @@ public interface SalaRepository extends JpaRepository<Sala,Long> {
                                   @Param("fechaFinal") LocalDateTime fechaFinal);
 
 }
-

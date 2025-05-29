@@ -46,5 +46,4 @@ public class SalaService {
         return !reservaService.existsActiveReservaForSala(salaId);
     }
 
-
 }

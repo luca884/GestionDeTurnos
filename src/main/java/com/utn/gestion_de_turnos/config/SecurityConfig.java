@@ -21,6 +21,9 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    }
+
     @Autowired
     private JwtCookieAuthenticationFilter jwtCookieAuthenticationFilter;
 

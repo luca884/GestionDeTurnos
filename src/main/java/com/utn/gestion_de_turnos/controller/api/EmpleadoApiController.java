@@ -1,4 +1,5 @@
 package com.utn.gestion_de_turnos.controller.api;
+import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Empleado;
 import com.utn.gestion_de_turnos.service.EmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,8 @@ public class EmpleadoApiController {
     public List<Empleado> getAllEmpleados() {
         return empleadoService.findAll();
     }
+
+    public List<Cliente> getAllClientes(){return  empleadoService.findAllClientes();}
 
     @DeleteMapping("/{id}")
     public void deleteEmpleado(@PathVariable Long id) {

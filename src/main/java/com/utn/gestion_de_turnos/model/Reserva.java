@@ -40,6 +40,9 @@ public class Reserva {
     @Column(nullable = false)
     private Estado estado;
 
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
     public enum Estado {
         ACTIVO,
         CANCELADO,

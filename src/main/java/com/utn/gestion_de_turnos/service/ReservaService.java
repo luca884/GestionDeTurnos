@@ -1,20 +1,40 @@
 package com.utn.gestion_de_turnos.service;
 
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
+import com.utn.gestion_de_turnos.API_Calendar.Service.ReservaSpecification;
 import com.utn.gestion_de_turnos.exception.AccesoProhibidoException;
 import com.utn.gestion_de_turnos.exception.ReservaNoCancelableException;
 import com.utn.gestion_de_turnos.exception.ReservaNotFoundException;
 import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
 import com.utn.gestion_de_turnos.model.Cliente;
+import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Sala;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.ClienteRepository;
-import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.ReservaRepository;
+import com.utn.gestion_de_turnos.repository.SalaRepository;
+import com.utn.gestion_de_turnos.repository.UsuarioRepository;
+import com.utn.gestion_de_turnos.repository.ReservaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import com.google.api.client.util.DateTime;
+import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,12 +44,16 @@ public class ReservaService {
     @Autowired
     private ReservaRepository reservaRepository;
     @Autowired
+    private GoogleCalendarService googleCalendarService;
+    @Autowired
     private ClienteRepository clienteRepository;
     @Autowired
     private SalaRepository salaRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-
-    public Reserva crearReserva(Long clienteId, Long salaId, LocalDateTime fechaInicio, LocalDateTime fechaFinal, Reserva.TipoPago tipoPago) {
+    @Transactional
+    public Reserva crearReserva(Long clienteId, Long salaId, LocalDateTime fechaInicio, LocalDateTime fechaFinal, Reserva.TipoPago tipoPago) throws Exception {
         Cliente cliente = clienteRepository.findById(clienteId).orElseThrow(()->
                 new RuntimeException("Cliente no encontrado"));
         Sala sala = salaRepository.findById(salaId).orElseThrow(()->
@@ -45,7 +69,70 @@ public class ReservaService {
         reserva.setFechaFinal(fechaFinal);
         reserva.setTipoPago(tipoPago);
         reserva.setEstado(Reserva.Estado.ACTIVO);
+
+        reservaRepository.save(reserva);
+
+        // Crear evento en Google Calendar
+        String titulo = "Reserva de " + reserva.getCliente().getNombre();
+        String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
+
+
+        Event evento = googleCalendarService.crearEventoConReserva(titulo, descripcion, reserva.getFechaInicio(),reserva.getFechaFinal());
+
+        // Guardar el ID del evento en la reserva
+        reserva.setGoogleEventId(evento.getId());
+
+        // Guardar de nuevo en la base con el ID de Google
+
         return reservaRepository.save(reserva);
+    }
+
+
+
+    public List<Reserva> listarTodas() {
+        return reservaRepository.findAll();
+    }
+
+    public List<Reserva> listarPorUsuarioActual() {
+        Usuario usuario = obtenerUsuarioActual();
+        return reservaRepository.findByUsuarioId(usuario.getId());
+    }
+
+    public Reserva buscarPorId(Long id) {
+        return reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + id));
+    }
+
+    public void eliminar(Long id) throws Exception {
+
+        if (reservaRepository.existsById(id)) {
+            Optional<Reserva> reserva = reservaRepository.findById(id);
+            googleCalendarService.eliminarEvento(reserva.get().getGoogleEventId());
+            reservaRepository.deleteById(id);
+        }
+        else{
+            throw new IllegalArgumentException("La reserva no existe");
+        }
+    }
+
+
+    public void modificar(Reserva reserva) throws Exception {
+        if (reservaRepository.existsById(reserva.getId())) {
+            reservaRepository.save(reserva);
+            // Modificar evento en Google Calendar
+            String titulo = "Reserva de " + reserva.getCliente().getNombre();
+            String descripcion = "Sala: " + reserva.getSala().getNumero() + "\nEmailCliente: " + reserva.getCliente().getEmail();
+
+            googleCalendarService.modificarEvento(reserva.getGoogleEventId(), titulo, descripcion, reserva.getFechaInicio(), reserva.getFechaFinal());
+        } else {
+            throw new EntityNotFoundException("La reserva no existe");
+        }
+    }
+
+    private Usuario obtenerUsuarioActual() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado por email: " + email));
     }
 
     public List<Reserva> findActiveByClienteId(Long clienteId) {
@@ -71,6 +158,7 @@ public class ReservaService {
 
 
     public void cancelarReservaPorCliente(Long reservaId, Long clienteId) {
+
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
 

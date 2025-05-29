@@ -15,8 +15,11 @@
         <div class="container">
             <div th:replace="~{fragments :: menu-empleado}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Todos Reservas activas</p>
-                <div th:replace="~{fragments :: reservas-table-empleado}"></div>
+                <p>Modificar Reserva</p>
+                <div th:replace="~{fragments :: update-reserva-table-empleado(reserva=${reserva})}"></div>
+                <div th:if="${error}" class="alert" role="alert">
+                    <p th:text="${error}"></p>
+                </div>
             </div>
         </div>
     </main>

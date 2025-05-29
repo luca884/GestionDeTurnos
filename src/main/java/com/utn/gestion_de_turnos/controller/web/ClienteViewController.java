@@ -57,7 +57,7 @@ public class ClienteViewController {
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(",")));
-        return "nueva-reserva";
+        return "cliente-nueva-reserva";
     }
 
     @GetMapping("/reservas/update")
@@ -74,7 +74,7 @@ public class ClienteViewController {
             model.addAttribute("fechaSoloFecha", r.getFechaInicio().toLocalDate());
             model.addAttribute("horaInicio", r.getFechaInicio().toLocalTime().toString().substring(0, 5));
             model.addAttribute("horaFinal", r.getFechaFinal().toLocalTime().toString().substring(0, 5));
-            return "cliente-reservas-update";
+            return "cliente-reserva-update";
         } else {
             model.addAttribute("error", "Reserva no encontrada");
             return "error";

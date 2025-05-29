@@ -28,7 +28,7 @@ public class ClienteApiController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<Cliente> getAllClientes() {
         return clienteService.findAll();
     }

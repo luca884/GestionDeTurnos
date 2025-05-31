@@ -1,0 +1,423 @@
+<!-- fragments.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Fragments</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Header fragment -->
+<div th:fragment="header">
+    <header>
+        <div class="header-content">
+            <div class="left">
+                <div class="home-link">
+                    <p> Gestion de turnos</p>
+                </div>
+                <!-- <a href="/about">Acerca de</a> -->
+            </div>
+            <div class="right" id="header-right">
+                <!--aca contenido depende de JS logica -->
+            </div>
+        </div>
+    </header>
+</div>
+
+
+<!-- fragments/client-menu.html -->
+<div th:fragment="menu-cliente">
+    <p class="menu-title">MENU</p>
+    <nav>
+        <ul class="menu-list">
+            <li><a th:href="@{/cliente/reservas}">Mis Reservas</a></li>
+            <li><a th:href="@{/cliente/reservas/nueva}">Nueva Reserva</a></li>
+            <li><a th:href="@{/cliente/perfil}">Perfil</a></li>
+        </ul>
+    </nav>
+</div>
+
+<!-- fragments/admin-menu.html -->
+<div th:fragment="menu-admin">
+    <p class="menu-title">MENU</p>
+    <nav>
+        <ul class="menu-list">
+            <li><a th:href="@{/admin/empleados}">Todos Empleados</a></li>
+            <li><a th:href="@{/admin/empleados/nuevo}">Crear Empleado</a></li>
+            <li><a th:href="@{/admin/salas/nueva}">Crear Sala</a></li>
+            <li><a th:href="@{/admin/salas}">Todas Salas</a></li>
+
+        </ul>
+    </nav>
+</div>
+
+<!-- fragments/admin-menu.html -->
+<div th:fragment="menu-empleado">
+    <p class="menu-title">MENU</p>
+    <nav>
+        <ul class="menu-list">
+            <li><a th:href="@{/empleado/reservas}">Reservas</a></li>
+            <li><a th:href="@{/empleado/reservas/nueva}">Reserva Nueva</a></li>
+            <li><a th:href="@{/empleado/salas}">Salas</a></li>
+            <li><a th:href="@{/empleado/perfil}">Calendario</a></li>
+        </ul>
+    </nav>
+</div>
+
+<!-- Footer fragment -->
+<div th:fragment="footer">
+    <footer>
+        <div class="footer-content">
+            <p>Copyright &copy; 2025</p>
+        </div>
+    </footer>
+</div>
+
+
+<!-- fragments/reserva-form.html -->
+<div th:fragment="reserva-form">
+    <div class="form-container">
+        <form id="reservaForm">
+            <div class="form-row">
+                <label for="salaId">№ de Sala:</label>
+                <select id="salaId" name="salaId" required style="width: 120px;">
+                    <option value="">Seleccione...</option>
+                    <!-- JavaScript -->
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label for="fecha">Fecha:</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+
+            <div class="form-row">
+                <label for="horaInicio">Hora de Inicio:</label>
+                <select id="horaInicio" name="horaInicio" required></select>
+            </div>
+
+            <div class="form-row">
+                <label for="horaFin">Hora de Fin:</label>
+                <select id="horaFin" name="horaFin" required></select>
+            </div>
+
+            <div class="form-row">
+                <label for="tipoPago">Tipo de Pago:</label>
+                <select id="tipoPago" name="tipoPago" required>
+                    <option value="">Seleccione...</option>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="TARJETA">Tarjeta</option>
+                </select>
+            </div>
+
+            <button type="submit" style="margin-top: 15px;">Crear Reserva</button>
+        </form>
+
+        <div id="reservaResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </div>
+</div>
+
+
+<!-- fragments/empleado-form.html -->
+
+<div th:fragment="empleado-form">
+    <form id="empleadoForm">
+        <div class="form-row">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+        <div class="form-row">
+            <label for="apellido">Apellido:</label>
+            <input type="text" id="apellido" name="apellido" required>
+        </div>
+        <div class="form-row">
+            <label for="dni">Dni:</label>
+            <input type="text" id="dni" name="dni" required>
+        </div>
+        <div class="form-row">
+            <label for="telefono">Telefono:</label>
+            <input type="text" id="telefono" name="telefono" required>
+        </div>
+        <div class="form-row">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-row">
+            <label for="legajo">Legajo:</label>
+            <input type="text" id="legajo" name="legajo" required>
+        </div>
+        <button type="submit" style="margin-top: 15px;">Crear Empleado</button>
+        <div id="empleadoResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </form>
+</div>
+
+
+<!-- fragments/sala-form.html -->
+<div th:fragment="sala-form">
+    <div class="form-container">
+        <form id="salaForm">
+            <div class="form-row">
+                <label for="numero">Numero:</label>
+                <input type="text" id="numero" name="numero" required>
+            </div>
+            <div class="form-row">
+                <label for="capacidad">Capacidad:</label>
+                <input type="text" id="capacidad" name="capacidad" required>
+            </div>
+            <div class="form-row">
+                <label for="descripcion">Descripcion:</label>
+                <input type="text" id="descripcion" name="descripcion" required>
+            </div>
+            <button type="submit" style="margin-top: 15px;">Crear Sala</button>
+        </form>
+        <div id="salaResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </div>
+</div>
+
+<!--fragments/reservas-table.html-->
+
+
+<div th:fragment="reservas-table">
+    <table class="table" id="reservas-table">
+        <thead>
+        <tr>
+            <th>Sala</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Pago</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="reservasTableBody">
+        <!-- aquí se insertan reservas -->
+        </tbody>
+    </table>
+</div>
+
+
+<!--fragments/salas-table.html-->
+
+<div th:fragment="salas-table">
+
+    <table class="table" id="salas-table">
+        <thead>
+        <tr style="gap: 10px">
+            <th>Número</th>
+            <th>Capacidad</th>
+            <th>Descripción</th>
+            <th>Accion</th>
+        </tr>
+        </thead>
+        <tbody id="salasTableBody"></tbody>
+    </table>
+</div>
+
+
+<!--fragments/update-sala-table.html-->
+
+<div th:fragment="update-sala-table(sala)">
+    <div class="form-container">
+        <form id="updateSalaForm" th:action="@{/admin/salas/update}" method="post">
+
+            <div class="form-row">
+                <label>Número:</label>
+                <input type="text" th:value="${sala.numero}" disabled>
+            </div>
+
+
+            <div class="form-row">
+                <label>Capacidad:</label>
+                <input type="text" th:value="${sala.cantPersonas}" disabled>
+            </div>
+            <div class="form-row">
+                <label for="descripcionUpdate">Descripcion:</label>
+                <input type="text" id="descripcionUpdate" name="descripcion" th:value="${sala.descripcion}" required>
+            </div>
+            <input type="hidden" name="id" th:value="${sala.id}"/>
+            <button type="submit" style="margin-top: 15px;">Confirmar</button>
+        </form>
+        <div id="salaUpdateResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </div>
+</div>
+
+
+<!--fragments/update-empleado-table.html-->
+
+<div th:fragment="update-empleado-table(empleado)">
+    <div class="form-container">
+        <form id="updateEmpleadoForm" th:action="@{/admin/empleados/update}" method="post">
+            <div class="form-row">
+                <label for="nombreUpdate">Nombre:</label>
+                <input type="text" id="nombreUpdate" name="nombre" th:value="${empleado.nombre}" required>
+            </div>
+            <div class="form-row">
+                <label for="apellidoUpdate">Apellido:</label>
+                <input type="text" id="apellidoUpdate" name="apellido" th:value="${empleado.apellido}" required>
+            </div>
+            <div class="form-row">
+                <label for="dniUpdate">DNI:</label>
+                <input type="text" id="dniUpdate" name="dni" th:value="${empleado.dni}" required>
+            </div>
+            <div class="form-row">
+                <label for="telefonoUpdate">Telefono:</label>
+                <input type="text" id="telefonoUpdate" name="telefono" th:value="${empleado.telefono}" required>
+            </div>
+            <div class="form-row">
+                <label for="emailUpdate">Email:</label>
+                <input type="text" id="emailUpdate" name="email" th:value="${empleado.email}" required>
+            </div>
+            <input type="hidden" name="id" th:value="${empleado.id}"/>
+            <button type="submit" style="margin-top: 15px;">Confirmar</button>
+        </form>
+        <div id="empleadoUpdateResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </div>
+</div>
+
+<!--fragments/empleados-table.html-->
+
+<div th:fragment="empleados-table">
+    <table class="table" id="empleados-table">
+        <thead>
+        <tr style="gap: 10px">
+            <th>Legajo</th>
+            <th>Nombre</th>
+            <th>DNI</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody id="empleadosTableBody"></tbody>
+    </table>
+</div>
+
+
+<!--fragments/update-reserva-table.html-->
+
+<div th:fragment="update-reserva-table(reserva)">
+    <div class="form-container">
+        <form id="updateReseraForm" th:action="@{/cliente/reservas/update}" method="post">
+            <!-- SALA -->
+            <div class="form-row">
+                <label for="salaNumeroUpdate">№ de Sala:</label>
+                <select id="salaNumeroUpdate" name="salaId" required style="width: 120px;">
+                    <option value="">Seleccione...</option>
+                    <option th:each="sala : ${salas}"
+                            th:value="${sala.id}"
+                            th:text="${sala.numero}"
+                            th:selected="${sala.id == reserva.sala.id}">
+                    </option>
+                </select>
+            </div>
+
+            <!--             FECHA-->
+            <div class="form-row">
+                <label for="fechaUpdate">Fecha:</label>
+                <input type="date"
+                       id="fechaUpdate"
+                       name="fecha"
+                       required
+                       th:value="${fechaSoloFecha}"/>
+            </div>
+
+            <!-- HORA INICIO -->
+            <div class="form-row">
+                <label for="horaInicioUpdate">Hora de Inicio:</label>
+                <select id="horaInicioUpdate" name="horaInicio" required>
+                    <option th:each="hora : ${horas}"
+                            th:value="${hora}"
+                            th:text="${hora}"
+                            th:selected="${hora == horaInicio}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- HORA FIN -->
+            <div class="form-row">
+                <label for="horaFinUpdate">Hora de Fin:</label>
+                <select id="horaFinUpdate" name="horaFin" required>
+                    <option th:each="hora : ${horas}"
+                            th:value="${hora}"
+                            th:text="${hora}"
+                            th:selected="${hora == horaFinal}">
+                    </option>
+                </select>
+            </div>
+
+            <!-- TIPO DE PAGO -->
+
+            <div class="form-row">
+                <label for="tipoPagoUpdate">Tipo de Pago:</label>
+                <select id="tipoPagoUpdate" name="tipoPago" required>
+                    <option value="">Seleccione...</option>
+                    <option value="EFECTIVO"
+                            th:selected="${reserva.tipoPago == T(com.utn.gestion_de_turnos.model.Reserva.TipoPago).EFECTIVO}">
+                        Efectivo
+                    </option>
+                    <option value="TARJETA"
+                            th:selected="${reserva.tipoPago == T(com.utn.gestion_de_turnos.model.Reserva.TipoPago).TARJETA}">
+                        Tarjeta
+                    </option>
+                </select>
+            </div>
+            <input type="hidden" name="id" th:value="${reserva.id}"/>
+            <button type="submit" style="margin-top: 15px;">Confirmar</button>
+        </form>
+        <div id="reservaUpdateResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </div>
+</div>
+
+
+<!-- fragments/update-cliente-perfil.html -->
+
+<div th:fragment="update-cliente-perfil(cliente)">
+    <div class="form-container">
+        <form id="updateClienteForm" th:action="@{/cliente/perfil/update}" method="post">
+            <div class="form-row">
+                <label for="nombreCliente">Nombre:</label>
+                <input type="text" id="nombreCliente" name="nombre" th:value="${cliente.nombre}" disabled>
+            </div>
+            <div class="form-row">
+                <label for="apellidoCliente">Apellido:</label>
+                <input type="text" id="apellidoCliente" name="apellido" th:value="${cliente.apellido}" disabled>
+            </div>
+            <div class="form-row">
+                <label for="dniCliente">DNI:</label>
+                <input type="text" id="dniCliente" name="dni" th:value="${cliente.dni}" disabled>
+            </div>
+            <div class="form-row">
+                <label for="telefonoCliente">Teléfono:</label>
+                <input type="text" id="telefonoCliente" name="telefono" th:value="${cliente.telefono}" disabled>
+            </div>
+            <button type="button" id="editarPerfilBtn" style="margin-top: 15px;">Editar</button>
+        </form>
+        <div id="clienteUpdateResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const editButton = document.getElementById("editarPerfilBtn");
+            const form = document.getElementById("updateClienteForm");
+            const inputs = form.querySelectorAll("input");
+
+            editButton.addEventListener("click", function handler(event) {
+                event.preventDefault();
+                inputs.forEach(input => {
+                    if (input.type !== "hidden") {
+                        input.disabled = false;
+                    }
+                });
+                editButton.textContent = "Guardar cambios";
+                editButton.type = "submit";
+                editButton.removeEventListener("click", handler);
+            });
+        });
+    </script>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+</body>
+</html>

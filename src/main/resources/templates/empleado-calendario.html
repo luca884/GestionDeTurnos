@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Cliente</title>
+    <title>Empleado</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
@@ -13,14 +13,9 @@
     <div th:replace="~{fragments :: header}"></div>
     <main>
         <div class="container">
-            <div th:replace="~{fragments :: menu-cliente}" class="main-menu"></div>
+            <div th:replace="~{fragments :: menu-empleado}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Modificar Reserva</p>
-                <div th:replace="~{fragments :: update-reserva-table(reserva=${reserva})}"></div>
-                <div th:if="${error}" class="alert" role="alert">
-                    <p th:text="${error}"></p>
-                </div>
-            </div>
+                <iframe src="https://calendar.google.com/calendar/embed?src=f552183e1de85afe0892395dd0e5dab6c914f97427d62e4b1e64b82c1705871f%40group.calendar.google.com&ctz=America%2FArgentina%2FBuenos_Aires" style="border: 0" width="800" height="600" frameborder="0" scrolling="no"></iframe>            </div>
         </div>
     </main>
     <div th:replace="~{fragments :: footer}"></div>

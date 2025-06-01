@@ -1,0 +1,8 @@
+src/main/resources/service-account.json
+/target/
+/test-output/
+.mvn/
+.mvn/wrapper/maven-wrapper.jar
+.DS_Store
+.idea/
+*.iml

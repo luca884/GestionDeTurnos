@@ -1,12 +1,11 @@
 package com.utn.gestion_de_turnos.controller.api;
 
-import com.utn.gestion_de_turnos.exception.TiempoDeReservaOcupadoException;
-import com.google.api.services.calendar.model.Event;
+import com.utn.gestion_de_turnos.exception.AccesoProhibidoException;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
-import com.utn.gestion_de_turnos.model.Cliente;
+import com.utn.gestion_de_turnos.exception.ReservaNotFoundException;
+import com.utn.gestion_de_turnos.exception.SalaNotFoundException;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Sala;
-import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.UsuarioRepository;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
@@ -16,8 +15,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -45,37 +42,56 @@ public class ReservaApiController {
     private SalaRepository salaRepository;
 
     @PostMapping("/crear")
-    public String crearReservaConDTO(@Valid @RequestBody ReservaRequest dto) {
-        try {
-            Cliente cliente = (Cliente) usuarioRepository.findById(dto.getClienteId())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-            Sala sala = salaRepository.findById(dto.getSalaId())
-                    .orElseThrow(() -> new RuntimeException("Sala no encontrada"));
+    public ResponseEntity<?> crearReserva(
+            @Valid @RequestBody ReservaApiController.ReservaRequestByCliente request,
+            Authentication authentication) {
 
-            reservaService.crearReserva(
-                    dto.clienteId,
-                    dto.salaId,
-                    dto.fechaInicio,
-                    dto.fechaFinal,
-                    dto.getTipoPago()
-            );
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        Long clienteId = user.getId();
 
+        Reserva reserva = reservaService.saveReserva(
+                clienteId,
+                request.getSalaId(),
+                request.getFechaInicio(),
+                request.getFechaFinal(),
+                request.getTipoPago()
+        );
 
-        } catch (Exception e) {
-            return "Error al crear reserva y evento: " + e.getMessage();
-        }
-        return "Se ha realizado la Reserva correctamente";
+        return ResponseEntity.ok(reserva);
     }
 
-    @GetMapping("/listar")
-    public List<Reserva> listarTodas() {
-        return reservaService.listarTodas();
+
+    @PostMapping("crear/by-empleado")
+    public ResponseEntity<?> saveReservaByEmpleado(@RequestBody ReservaRequestByEmpleado request) {
+        Long clienteId = request.getClienteId();
+
+        Reserva reserva = reservaService.saveReserva(
+                clienteId,
+                request.getSalaId(),
+                request.getFechaInicio(),
+                request.getFechaFinal(),
+                request.getTipoPago()
+        );
+
+        return ResponseEntity.ok(reserva);
     }
 
-    @GetMapping("/cliente")
-    public List<Reserva> listarReservasDelCliente() {
-        return reservaService.listarPorUsuarioActual();
+
+    @PutMapping("/{id}/cancelar")
+    public ResponseEntity<?> cancelarReserva(@PathVariable Long id, Authentication authentication) {
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long clienteId = userDetails.getId();
+
+        reservaService.cancelarReservaPorCliente(id, clienteId);
+        return ResponseEntity.ok(Map.of("message", "Reserva cancelada correctamente"));
     }
+
+    @PutMapping("/{id}/cancelar/by-empleado")
+    public ResponseEntity<?> cancelarReservaPorEmpleado(@PathVariable Long id) {
+        reservaService.cancelarReservaPorEmpleado(id);
+        return ResponseEntity.ok(Map.of("message", "Reserva cancelada correctamente por el empleado"));
+    }
+
 
     @DeleteMapping("/eliminar/{id}")
     public String eliminarReservaYEvento(@PathVariable Long id) {
@@ -87,28 +103,61 @@ public class ReservaApiController {
         }
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<?> updateReserva(@Valid @RequestBody ReservaUpdateRequest request, Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        Long clienteId = user.getId();
 
-    @PutMapping("/{id}/cancelar")
-    public ResponseEntity<?> cancelarReserva(@PathVariable Long id, Authentication authentication) {
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Long clienteId = userDetails.getId();
+        Reserva reservaExistente = reservaService.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
 
-        try {
-            reservaService.cancelarReservaPorCliente(id, clienteId);
-            return ResponseEntity.ok(Map.of("message", "Reserva cancelada correctamente"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        // update reserva by cliente
+        if (!reservaExistente.getCliente().getId().equals(clienteId)) {
+            throw new AccesoProhibidoException("No tienes permiso para modificar esta reserva");
         }
+
+        if (reservaExistente.getEstado() != Reserva.Estado.ACTIVO) {
+            throw new RuntimeException("Solo se pueden modificar reservas activas");
+        }
+
+        Sala sala = salaRepository.findById(request.getSalaId())
+                .orElseThrow(() -> new RuntimeException("Sala no encontrada"));
+
+        reservaExistente.setSala(sala);
+        reservaExistente.setFechaInicio(request.getFechaInicio());
+        reservaExistente.setFechaFinal(request.getFechaFinal());
+        reservaExistente.setTipoPago(request.getTipoPago());
+
+        reservaService.modificar(reservaExistente);
+
+        return ResponseEntity.ok(Map.of("message", "Reserva actualizada correctamente"));
     }
 
-    @PutMapping("/{id}/cancelar/by-empleado")
-    public ResponseEntity<?> cancelarReservaPorEmpleado(@PathVariable Long id) {
-        try {
-            reservaService.cancelarReservaPorEmpleado(id);
-            return ResponseEntity.ok(Map.of("message", "Reserva cancelada correctamente por el empleado"));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+
+    @PutMapping("/update/by-empleado")
+    public ResponseEntity<?> updateReservaEmpleado(@RequestBody ReservaUpdateRequest request, Authentication authentication) {
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
+        if (user == null || user.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("EMPLEADO"))) {
+            throw new AccesoProhibidoException("No tienes permiso para realizar esta acción");
         }
+
+        Reserva reserva = reservaService.findById(request.getId())
+                .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
+
+        Sala sala = salaRepository.findById(request.getSalaId())
+                .orElseThrow(() -> new SalaNotFoundException("Sala no encontrada"));
+
+        if (!request.getFechaInicio().isBefore(request.getFechaFinal())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser menor que la hora de fin.");
+        }
+
+        reserva.setSala(sala);
+        reserva.setFechaInicio(request.getFechaInicio());
+        reserva.setFechaFinal(request.getFechaFinal());
+        reserva.setTipoPago(request.getTipoPago());
+        reservaService.modificar(reserva);
+        return ResponseEntity.ok(Map.of("message", "Reserva actualizada correctamente"));
     }
 
 
@@ -116,7 +165,7 @@ public class ReservaApiController {
     public ResponseEntity<List<ReservaResponse>> getAllReservasActivas(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long clienteId = userDetails.getId();
-        List<ReservaResponse> reservasActivas = reservaService.findByAllActivas()
+        List<ReservaResponse> reservasActivas = reservaService.findAllActivas()
                 .stream()
                 .map(reserva -> new ReservaResponse(
                         reserva.getId(),
@@ -132,45 +181,28 @@ public class ReservaApiController {
         return ResponseEntity.ok(reservasActivas);
     }
 
-    @PostMapping("/by-empleado")
-    public ResponseEntity<?> saveReservaByEmpleado(@RequestBody ReservaRequest request) {
-        try {
-            Long clienteId = request.getClienteId(); // <-- теперь из запроса
-            Reserva reserva = reservaService.crearReserva(
-                    clienteId,
-                    request.getSalaId(),
-                    request.getFechaInicio(),
-                    request.getFechaFinal(),
-                    request.getTipoPago());
-            return ResponseEntity.ok(reserva);
-        } catch (TiempoDeReservaOcupadoException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-@PutMapping("/modificar/{id}")
-public String modificarReservaYEvento(@PathVariable Long id) {
-    try {
-        Reserva reserva = reservaService.buscarPorId(id);
-        reservaService.modificar(reserva);
-        return "Reserva y evento modificados.";
-    } catch (Exception e) {
-        return "Error al modificar: " + e.getMessage();
-    }
-}
-
-
-
-    // dto
+    // dto's
     @Data
-    public static class ReservaRequest {
+    public static class ReservaRequestByEmpleado {
 
-        @NotNull(message = "clienteId es obligatorio")
+        @NotNull(message = "empleadoId es obligatorio")
         private Long clienteId;
+
+        @NotNull(message = "salaId es obligatorio")
+        private Long salaId;
+
+        @NotNull(message = "fechaInicio es obligatorio")
+        private LocalDateTime fechaInicio;
+
+        @NotNull(message = "fechaFinal es obligatorio")
+        private LocalDateTime fechaFinal;
+
+        @NotNull(message = "tipoPago es obligatorio")
+        private Reserva.TipoPago tipoPago;
+    }
+
+    @Data
+    public static class ReservaRequestByCliente {
 
         @NotNull(message = "salaId es obligatorio")
         private Long salaId;
@@ -197,4 +229,20 @@ public String modificarReservaYEvento(@PathVariable Long id) {
         private String estado;
         private String clienteEmail;
     }
+
+    @Data
+    public static class ReservaUpdateRequest {
+        @NotNull
+        private Long id;
+        @NotNull
+        private Long salaId;
+        @NotNull
+        private LocalDateTime fechaInicio;
+        @NotNull
+        private LocalDateTime fechaFinal;
+        @NotNull
+        private Reserva.TipoPago tipoPago;
+    }
+
+
 }

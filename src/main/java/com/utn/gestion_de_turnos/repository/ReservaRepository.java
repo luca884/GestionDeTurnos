@@ -35,5 +35,4 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     List<Reserva> findAll(Specification<Reserva> spec);
 
-    List<Reserva> findByUsuarioId(Long id);
 }

@@ -21,11 +21,16 @@ public class AdminInitializer implements CommandLineRunner {
     public void run(String... args) {
         boolean adminExiste = usuarioRepository.findByEmail("ADMIN@gmail.com").isPresent();
 
+
         if (!adminExiste) {
             Admin admin = new Admin();
+            admin.setNombre("AdminNombre");
+            admin.setApellido("AdminApellido");
+            admin.setDni("12345678");
+            admin.setTelefono("12345678");
             admin.setEmail("ADMIN@gmail.com");
             admin.setContrasena(passwordEncoder.encode("ADMIN123"));
-            admin.setRol(Usuario.Rol.ADMIN); // Asegurate de usar tu enum correctamente
+            admin.setRol(Usuario.Rol.ADMIN);
             usuarioRepository.save(admin);
             System.out.println("✔ Usuario ADMIN creado con éxito.");
         } else {

@@ -1,29 +1,33 @@
 // GoogleCalendarClientFactory.java
 package com.utn.gestion_de_turnos.API_Calendar.Factory;
-
-import com.google.api.client.auth.oauth2.Credential;
-import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.List;
 
 @Component
 public class GoogleCalendarClientFactory {
 
-    @Autowired
-    private GoogleAuthorizationCodeFlow googleAuthorizationCodeFlow;
+    public Calendar getCalendarService() throws IOException, GeneralSecurityException {
+        GoogleCredentials credentials = GoogleCredentials
+                .fromStream(new ClassPathResource("service-account.json").getInputStream())
+                .createScoped(List.of(CalendarScopes.CALENDAR));
 
-    public Calendar getCalendarService() throws Exception {
-        Credential credential = googleAuthorizationCodeFlow.loadCredential("user");
-        if (credential == null) {
-            throw new IllegalStateException("No hay credenciales almacenadas. Primero debes autenticarte.");
-        }
         return new Calendar.Builder(
-                com.google.api.client.googleapis.javanet.GoogleNetHttpTransport.newTrustedTransport(),
-                com.google.api.client.json.jackson2.JacksonFactory.getDefaultInstance(),
-                credential
+                GoogleNetHttpTransport.newTrustedTransport(),
+                JacksonFactory.getDefaultInstance(),
+                new HttpCredentialsAdapter(credentials)
         ).setApplicationName("GestionDeTurnos").build();
     }
+
 }
 

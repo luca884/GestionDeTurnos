@@ -23,9 +23,18 @@ public class ClienteService {
         if (cliente == null) {
             throw new IllegalArgumentException("Cliente no puede ser nulo");
         }
-        cliente.setContrasena(passwordEncoder.encode(cliente.getContrasena()));
+
+        if (cliente.getId() == null) {
+            cliente.setContrasena(passwordEncoder.encode(cliente.getContrasena()));
+        } else {
+            Cliente existente = clienteRepository.findById(cliente.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + cliente.getId()));
+            cliente.setContrasena(existente.getContrasena());
+        }
+
         return clienteRepository.save(cliente);
     }
+
 
     public Optional<Cliente> findById(Long id) {
         return clienteRepository.findById(id);

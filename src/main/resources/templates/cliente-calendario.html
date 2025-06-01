@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Empleado</title>
+    <title>Cliente</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
@@ -13,10 +13,9 @@
     <div th:replace="~{fragments :: header}"></div>
     <main>
         <div class="container">
-            <div th:replace="~{fragments :: menu-empleado}" class="main-menu"></div>
+            <div th:replace="~{fragments :: menu-cliente}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Todas salas</p>
-                <div th:replace="~{fragments :: salas-table-view}"></div>
+                <div th:replace="~{fragments :: cliente-calendario}"></div>
             </div>
         </div>
     </main>
@@ -24,5 +23,10 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://unpkg.com/tooltip.js@1.3.3/dist/umd/tooltip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+<script src="/js/calendar.js"></script>
+
 </body>
 </html>

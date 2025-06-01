@@ -2,7 +2,7 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Cliente</title>
+    <title>Empleado</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="/js/script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet"/>
@@ -13,13 +13,10 @@
     <div th:replace="~{fragments :: header}"></div>
     <main>
         <div class="container">
-            <div th:replace="~{fragments :: menu-cliente}" class="main-menu"></div>
+            <div th:replace="~{fragments :: menu-empleado}" class="main-menu"></div>
             <div class="main-contenido">
-                <p>Modificar Reserva</p>
-                <div th:replace="~{fragments :: update-reserva-table(reserva=${reserva})}"></div>
-                <div th:if="${error}" class="alert" role="alert">
-                    <p th:text="${error}"></p>
-                </div>
+                <p>Todos clientes</p>
+                <div th:replace="~{fragments :: clientes-table-empleado}"></div>
             </div>
         </div>
     </main>

@@ -36,21 +36,18 @@ main {
     margin: 0;
 }
 
-.menu-list{
-    list-style-type: none;
-    margin: 0;
-}
 
-.menu-list ul {
+.menu-list {
     list-style-type: none;
-    padding: 0;
     margin: 0;
-    font-weight: bold;
+    text-align: left;
+    padding-left: 0;
 }
 
 .menu-list li {
     padding: 10px;
     border-bottom: 1px solid #ccc;
+    text-align: left;
 }
 
 
@@ -58,7 +55,6 @@ main {
     text-decoration: none;
     color: #333;
     display: block;
-    padding: 10px;
     border-radius: 5px;
     transition: background-color 0.3s ease, color 0.3s ease;
     cursor: pointer;
@@ -73,11 +69,7 @@ main {
     color: #a7288a;
 }
 
-.menu-list li a:focus {
-    outline: 2px solid #a7288a;
-}
-
-.home-content{
+.home-content {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -136,6 +128,7 @@ footer {
     padding: 15px 0;
     text-align: left;
     margin-top: auto;
+    flex-shrink: 0;
 }
 
 .footer-content {
@@ -188,7 +181,7 @@ button:hover {
 
 p {
     font-size: 18px;
-    padding: 10px;
+    padding: 7px;
 }
 
 /* right block user-info */
@@ -294,6 +287,7 @@ td.actions {
     gap: 10px;
     align-items: center;
 }
+
 td.actions button, td.actions a {
     background: none;
     border: none;
@@ -302,6 +296,7 @@ td.actions button, td.actions a {
     color: #333;
     padding: 4px;
 }
+
 td.actions button:hover, td.actions a:hover {
     color: #a7288a;
 }
@@ -332,19 +327,105 @@ table.table th, table.table td {
 .toast-success {
     background-color: #a7288a !important;
     color: white !important;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     border-radius: 5px;
 }
 
 .toast-error {
     background-color: white !important;
     color: #a7288a !important;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     border-radius: 5px;
 }
 
-.alert{
+.alert {
     color: #a7288a;
+}
+
+
+.fc-button-group {
+    display: inline;
+    justify-content: center;
+}
+
+
+.fc .fc-button {
+    margin-top: 5px;
+    background-color: #2596be;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.fc .fc-button:hover {
+    background-color: #1b6d90;
+}
+
+.fc .fc-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    margin-left: 0;
+}
+
+.fc-header-toolbar .fc-toolbar-chunk:last-child .fc-button-group {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+}
+
+.fc-header-toolbar .fc-today-button {
+    margin-left: 8px;
+}
+
+.fc-button-group .fc-prev-button {
+    margin-right: 5px;
+}
+
+.fc-today-button {
+    min-width: unset;
+    width: 95px;
+    text-align: center;
+}
+
+.fc .fc-button:not(:disabled) {
+    cursor: pointer;
+    margin-left: 0;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 18px;
+    padding-left: 10px;
+}
+
+.fc .fc-toolbar.fc-header-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.fc-prev-button:active,
+.fc-prev-button:focus,
+.fc-next-button:active,
+.fc-next-button:focus {
+    background-color: #2596be !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+
+.fc .fc-button.fc-button-primary:disabled {
+    background-color: #d9f6e0 !important;
+    border-color: #d9f6e0 !important;
+    color: #000 !important;
+    opacity: 1;
+}
+
+.fc .fc-day-today {
+    background-color: #d9f6e0 !important;
 }
 
 

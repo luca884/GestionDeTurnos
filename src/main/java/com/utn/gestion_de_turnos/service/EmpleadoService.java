@@ -30,7 +30,13 @@ public class EmpleadoService {
         if (empleado == null) {
             throw new IllegalArgumentException("Empleado no puede ser nulo");
         }
-        empleado.setContrasena(passwordEncoder.encode(empleado.getContrasena()));
+        if (empleado.getId() == null) {
+            empleado.setContrasena(passwordEncoder.encode(empleado.getContrasena()));
+        } else {
+            Empleado existente = empleadoRepository.findById(empleado.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Empleado no encontrado con ID: " + empleado.getId()));
+            empleado.setContrasena(existente.getContrasena());
+        }
         return empleadoRepository.save(empleado);
     }
 
@@ -61,10 +67,9 @@ public class EmpleadoService {
         return empleado;
     }
 
-    public List<Cliente> findAllClientes(){
+    public List<Cliente> findAllClientes() {
         return clienteRepository.findAll();
     }
-
 
 
     public Empleado login(String email, String contrasena) {

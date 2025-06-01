@@ -44,7 +44,6 @@ public class AuthViewController {
     }
 
 
-
     @GetMapping("/register")
     public String register(@RequestParam(value = "success", required = false) String success, Model model) {
         model.addAttribute("cliente", new Cliente());

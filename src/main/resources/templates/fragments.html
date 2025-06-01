@@ -25,34 +25,44 @@
     </header>
 </div>
 
+<!-- Footer fragment -->
+<div th:fragment="footer">
+    <footer>
+        <div class="footer-content">
+            <p style="padding: 0">Copyright &copy; 2025</p>
+        </div>
+    </footer>
+</div>
 
-<!-- fragments/client-menu.html -->
+
+<!-- fragments/client-menu -->
 <div th:fragment="menu-cliente">
     <p class="menu-title">MENU</p>
     <nav>
         <ul class="menu-list">
             <li><a th:href="@{/cliente/reservas}">Mis Reservas</a></li>
             <li><a th:href="@{/cliente/reservas/nueva}">Nueva Reserva</a></li>
+            <li><a th:href="@{/cliente/calendario}">Calendario</a></li>
+            <li><a th:href="@{/cliente/salas}">Nuestras salas</a></li>
             <li><a th:href="@{/cliente/perfil}">Perfil</a></li>
         </ul>
     </nav>
 </div>
 
-<!-- fragments/admin-menu.html -->
+<!-- fragments/admin-menu -->
 <div th:fragment="menu-admin">
     <p class="menu-title">MENU</p>
     <nav>
         <ul class="menu-list">
             <li><a th:href="@{/admin/empleados}">Todos Empleados</a></li>
+            <li><a th:href="@{/admin/salas}">Todas Salas</a></li>
             <li><a th:href="@{/admin/empleados/nuevo}">Crear Empleado</a></li>
             <li><a th:href="@{/admin/salas/nueva}">Crear Sala</a></li>
-            <li><a th:href="@{/admin/salas}">Todas Salas</a></li>
-
         </ul>
     </nav>
 </div>
 
-<!-- fragments/empleado-menu.html -->
+<!-- fragments/empleado-menu -->
 <div th:fragment="menu-empleado">
     <p class="menu-title">MENU</p>
     <nav>
@@ -60,23 +70,15 @@
             <li><a th:href="@{/empleado/reservas}">Reservas activas</a></li>
             <li><a th:href="@{/empleado/reservas/nueva}">Reserva Nueva</a></li>
             <li><a th:href="@{/empleado/salas}">Salas</a></li>
+            <li><a th:href="@{/empleado/clientes}">Clientes</a></li>
             <li><a th:href="@{/empleado/calendario}">Calendario</a></li>
             <li><a th:href="@{/empleado/perfil}">Perfil</a></li>
         </ul>
     </nav>
 </div>
 
-<!-- Footer fragment -->
-<div th:fragment="footer">
-    <footer>
-        <div class="footer-content">
-            <p>Copyright &copy; 2025</p>
-        </div>
-    </footer>
-</div>
+<!-- fragments/ form para crear reserva by cliente -->
 
-
-<!-- fragments/reserva-form para el cliente -->
 <div th:fragment="reserva-form">
     <div class="form-container">
         <form id="reservaForm">
@@ -90,7 +92,7 @@
 
             <div class="form-row">
                 <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" name="fecha" required>
+                <input type="date" id="fecha" name="fecha" required min="" max="">
             </div>
 
             <div class="form-row">
@@ -120,7 +122,7 @@
 </div>
 
 
-<!-- fragments/reserva-form para el empleado -->
+<!-- fragments/ form para crear reserva by empleado -->
 
 <div th:fragment="reserva-form-empleado">
     <div class="form-container">
@@ -142,7 +144,7 @@
 
             <div class="form-row">
                 <label for="fechaByEmpleado">Fecha:</label>
-                <input type="date" id="fechaByEmpleado" name="fechaByEmpleado" required>
+                <input type="date" id="fechaByEmpleado" name="fechaByEmpleado" required min="" max="">
             </div>
 
             <div class="form-row">
@@ -171,10 +173,10 @@
     </div>
 </div>
 
-<!-- fragments/empleado-form.html -->
 
+<!-- fragments/ form para crear empleado by admin -->
 <div th:fragment="empleado-form">
-    <form id="empleadoForm">
+    <form id="empleadoCrearForm">
         <div class="form-row">
             <label for="nombre">Nombre:</label>
             <input type="text" id="nombre" name="nombre" required>
@@ -205,7 +207,7 @@
 </div>
 
 
-<!-- fragments/sala-form.html -->
+<!-- fragments/ form para crear sala by admin -->
 <div th:fragment="sala-form">
     <div class="form-container">
         <form id="salaForm">
@@ -227,9 +229,8 @@
     </div>
 </div>
 
-<!--fragments/reservas-table.html para el cliente-->
 
-
+<!--fragments/reservas-table para el cliente-->
 <div th:fragment="reservas-table">
     <table class="table" id="reservas-table">
         <thead>
@@ -243,13 +244,13 @@
         </tr>
         </thead>
         <tbody id="reservasTableBody">
-        <!-- aquí se insertan reservas -->
+        <!-- aquí se insertan reservas by JS  -->
         </tbody>
     </table>
 </div>
 
 
-<!--fragments/salas-table para admin-->
+<!--fragments/salas-table para el admin-->
 
 <div th:fragment="salas-table">
 
@@ -266,11 +267,12 @@
     </table>
 </div>
 
-<!--fragments/salas-table para empleado-->
 
-<div th:fragment="salas-table-empleado">
+<!--fragments/salas-table para empleado/cliente-->
 
-    <table class="table" id="salas-table-empleado">
+<div th:fragment="salas-table-view">
+
+    <table class="table" id="salas-table-view">
         <thead>
         <tr style="gap: 10px">
             <th>Número</th>
@@ -283,7 +285,26 @@
 </div>
 
 
-<!--fragments/update-sala-table.html-->
+<!--fragments/clientes-table para empleado-->
+
+<div th:fragment="clientes-table-empleado">
+
+    <table class="table" id="clientes-table-empleado">
+        <thead>
+        <tr style="gap: 10px">
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>DNI</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+        </tr>
+        </thead>
+        <tbody id="clientesTableBodyEmpleado"></tbody>
+    </table>
+</div>
+
+
+<!--fragments/update-sala-form para el admin-->
 
 <div th:fragment="update-sala-table(sala)">
     <div class="form-container">
@@ -311,7 +332,7 @@
 </div>
 
 
-<!--fragments/update-empleado-table.html-->
+<!--fragments/update-empleado form para el admin -->
 
 <div th:fragment="update-empleado-table(empleado)">
     <div class="form-container">
@@ -343,7 +364,8 @@
     </div>
 </div>
 
-<!--fragments/empleados-table.html-->
+
+<!--fragments/empleados-table para el admin-->
 
 <div th:fragment="empleados-table">
     <table class="table" id="empleados-table">
@@ -362,11 +384,11 @@
 </div>
 
 
-<!--fragments/update-reserva-table.html-->
+<!--fragments/reserva-update-form para el cliente-->
 
 <div th:fragment="update-reserva-table(reserva)">
     <div class="form-container">
-        <form id="updateReseraForm" th:action="@{/cliente/reservas/update}" method="post">
+        <form id="updateReservaFormCliente">
             <!-- SALA -->
             <div class="form-row">
                 <label for="salaNumeroUpdate">№ de Sala:</label>
@@ -387,6 +409,8 @@
                        id="fechaUpdate"
                        name="fecha"
                        required
+                       min=""
+                       max=""
                        th:value="${fechaSoloFecha}"/>
             </div>
 
@@ -433,20 +457,20 @@
             <input type="hidden" name="id" th:value="${reserva.id}"/>
             <button type="submit" style="margin-top: 15px;">Confirmar</button>
         </form>
-        <div id="reservaUpdateResult" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
+        <div id="reservaUpdateResultCliente" style="margin-top: 15px;text-align: center; color: #a7288a;"></div>
     </div>
 </div>
 
 
-<!--fragments/update-reserva-table.html-->
+<!--fragments/reserva-update-form para el empleado-->
 
 <div th:fragment="update-reserva-table-empleado(reserva)">
     <div class="form-container">
-        <form id="updateReseraFormEmpleado" th:action="@{/empleado/reservas/update}" method="post">
+        <form id="updateReservaFormEmpleado">
             <!-- SALA -->
             <div class="form-row">
-                <label for="salaNumeroUpdate">№ de Sala:</label>
-                <select id="salaNumeroUpdate" name="salaId" required style="width: 120px;">
+                <label for="salaNumeroUpdate1">№ de Sala:</label>
+                <select id="salaNumeroUpdate1" name="salaId" required style="width: 120px;">
                     <option value="">Seleccione...</option>
                     <option th:each="sala : ${salas}"
                             th:value="${sala.id}"
@@ -458,18 +482,20 @@
 
             <!--             FECHA-->
             <div class="form-row">
-                <label for="fechaUpdate">Fecha:</label>
+                <label for="fechaUpdate1">Fecha:</label>
                 <input type="date"
-                       id="fechaUpdate"
+                       id="fechaUpdate1"
                        name="fecha"
+                       min=""
+                       max=""
                        required
                        th:value="${fechaSoloFecha}"/>
             </div>
 
             <!-- HORA INICIO -->
             <div class="form-row">
-                <label for="horaInicioUpdate">Hora de Inicio:</label>
-                <select id="horaInicioUpdate" name="horaInicio" required>
+                <label for="horaInicioUpdate1">Hora de Inicio:</label>
+                <select id="horaInicioUpdate1" name="horaInicio" required>
                     <option th:each="hora : ${horas}"
                             th:value="${hora}"
                             th:text="${hora}"
@@ -480,8 +506,8 @@
 
             <!-- HORA FIN -->
             <div class="form-row">
-                <label for="horaFinUpdate">Hora de Fin:</label>
-                <select id="horaFinUpdate" name="horaFin" required>
+                <label for="horaFinUpdate1">Hora de Fin:</label>
+                <select id="horaFinUpdate1" name="horaFin" required>
                     <option th:each="hora : ${horas}"
                             th:value="${hora}"
                             th:text="${hora}"
@@ -493,8 +519,8 @@
             <!-- TIPO DE PAGO -->
 
             <div class="form-row">
-                <label for="tipoPagoUpdate">Tipo de Pago:</label>
-                <select id="tipoPagoUpdate" name="tipoPago" required>
+                <label for="tipoPagoUpdate1">Tipo de Pago:</label>
+                <select id="tipoPagoUpdate1" name="tipoPago" required>
                     <option value="">Seleccione...</option>
                     <option value="EFECTIVO"
                             th:selected="${reserva.tipoPago == T(com.utn.gestion_de_turnos.model.Reserva.TipoPago).EFECTIVO}">
@@ -562,7 +588,7 @@
 
 </div>
 
-<!--fragments/reservas-table.html para el empleado-->
+<!--fragments/reservas-table para el empleado-->
 
 
 <div th:fragment="reservas-table-empleado">
@@ -573,7 +599,6 @@
             <th>Inicio</th>
             <th>Fin</th>
             <th>Pago</th>
-            <th>Estado</th>
             <th>Cliente</th>
             <th>Acciones</th>
         </tr>
@@ -614,8 +639,11 @@
     </div>
 </div>
 
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- fragments/ cliente-calendario -->
+<div th:fragment="cliente-calendario">
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
+</div>
 </body>
 </html>

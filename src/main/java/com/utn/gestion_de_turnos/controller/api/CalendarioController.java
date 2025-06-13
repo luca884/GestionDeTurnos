@@ -1,17 +1,22 @@
 package com.utn.gestion_de_turnos.controller.api;
 
 
+import com.utn.gestion_de_turnos.dto.EventoCalendarioDTO;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
 import com.utn.gestion_de_turnos.service.ReservaService;
-import lombok.Data;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.core.Authentication;
 
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +24,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/calendario")
+@Tag(name = "Calendario", description = "Eventos visibles en el calendario del cliente")
 public class CalendarioController {
 
     @Autowired
@@ -29,13 +35,22 @@ public class CalendarioController {
     }
 
     @GetMapping("/eventos")
-    public List<EventoCalendarioDto> obtenerEventos(Authentication authentication) {
+    @Operation(
+            summary = "Obtener eventos del calendario",
+            description = "Devuelve todas las reservas activas como eventos. El cliente autenticado verá cuáles le pertenecen."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de eventos obtenida con éxito",
+                    content = @Content(schema = @Schema(implementation = EventoCalendarioDTO.class))),
+            @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
+    public List<EventoCalendarioDTO> obtenerEventos(Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         Long clienteId = user.getId();
         List<Reserva> todasReservas = reservaService.findAllActivas();
         return todasReservas.stream()
                 .map(reserva -> {
-                    EventoCalendarioDto dto = new EventoCalendarioDto();
+                    EventoCalendarioDTO dto = new EventoCalendarioDTO();
                     dto.setId(reserva.getId());
                     dto.setStart(reserva.getFechaInicio());
                     dto.setEnd(reserva.getFechaFinal());
@@ -55,13 +70,4 @@ public class CalendarioController {
                 .collect(Collectors.toList());
     }
 
-    @Data
-    public static class EventoCalendarioDto {
-        private Long id;
-        private LocalDateTime start;
-        private LocalDateTime end;
-        private String title;
-        private String description;
-
-    }
 }

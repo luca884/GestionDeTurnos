@@ -1,5 +1,9 @@
 package com.utn.gestion_de_turnos.controller.api;
 
+import com.utn.gestion_de_turnos.dto.ReservaResponseDTO;
+import com.utn.gestion_de_turnos.dto.ReservaUpdateRequestDTO;
+import com.utn.gestion_de_turnos.dto.ReservaRequestByClienteDTO;
+import com.utn.gestion_de_turnos.dto.ReservaRequestByEmpleadoDTO;
 import com.utn.gestion_de_turnos.exception.AccesoProhibidoException;
 import com.utn.gestion_de_turnos.API_Calendar.Service.GoogleCalendarService;
 import com.utn.gestion_de_turnos.exception.ReservaNotFoundException;
@@ -10,21 +14,23 @@ import com.utn.gestion_de_turnos.repository.SalaRepository;
 import com.utn.gestion_de_turnos.repository.UsuarioRepository;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
 import com.utn.gestion_de_turnos.service.ReservaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
 // Eso es el controller de la API REST para la reserva
 
+@Tag(name = "Reserva", description = "Operaciones relacionadas con reservas")
 @RestController
 @RequestMapping("/api/reserva")
 public class ReservaApiController {
@@ -41,9 +47,15 @@ public class ReservaApiController {
     @Autowired
     private SalaRepository salaRepository;
 
+    @Operation(summary = "Crear una reserva", description = "Permite a un cliente autenticado crear una nueva reserva.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva creada correctamente", content = @Content(schema = @Schema(implementation = Reserva.class))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content),
+            @ApiResponse(responseCode = "401", description = "No autenticado", content = @Content)
+    })
     @PostMapping("/crear")
     public ResponseEntity<?> crearReserva(
-            @Valid @RequestBody ReservaApiController.ReservaRequestByCliente request,
+            @Valid @RequestBody ReservaRequestByClienteDTO request,
             Authentication authentication) {
 
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
@@ -61,8 +73,14 @@ public class ReservaApiController {
     }
 
 
+
+    @Operation(summary = "Crear una reserva por empleado", description = "Permite a un empleado crear una reserva en nombre de un cliente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva creada correctamente", content = @Content(schema = @Schema(implementation = Reserva.class))),
+            @ApiResponse(responseCode = "400", description = "Solicitud inválida", content = @Content)
+    })
     @PostMapping("crear/by-empleado")
-    public ResponseEntity<?> saveReservaByEmpleado(@RequestBody ReservaRequestByEmpleado request) {
+    public ResponseEntity<?> saveReservaByEmpleado(@RequestBody ReservaRequestByEmpleadoDTO request) {
         Long clienteId = request.getClienteId();
 
         Reserva reserva = reservaService.saveReserva(
@@ -77,6 +95,11 @@ public class ReservaApiController {
     }
 
 
+    @Operation(summary = "Cancelar una reserva (cliente)", description = "Permite a un cliente cancelar su propia reserva.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva cancelada correctamente", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acceso prohibido", content = @Content)
+    })
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<?> cancelarReserva(@PathVariable Long id, Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -86,6 +109,11 @@ public class ReservaApiController {
         return ResponseEntity.ok(Map.of("message", "Reserva cancelada correctamente"));
     }
 
+
+    @Operation(summary = "Cancelar una reserva (empleado)", description = "Permite a un empleado cancelar cualquier reserva.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva cancelada correctamente", content = @Content)
+    })
     @PutMapping("/{id}/cancelar/by-empleado")
     public ResponseEntity<?> cancelarReservaPorEmpleado(@PathVariable Long id) {
         reservaService.cancelarReservaPorEmpleado(id);
@@ -93,6 +121,11 @@ public class ReservaApiController {
     }
 
 
+    @Operation(summary = "Eliminar reserva y evento asociado", description = "Elimina una reserva y su evento correspondiente del calendario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva eliminada correctamente", content = @Content),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content)
+    })
     @DeleteMapping("/eliminar/{id}")
     public String eliminarReservaYEvento(@PathVariable Long id) {
         try {
@@ -103,8 +136,14 @@ public class ReservaApiController {
         }
     }
 
+    @Operation(summary = "Actualizar reserva por cliente", description = "Permite al cliente modificar su propia reserva si está activa.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva actualizada correctamente", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acceso prohibido", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Reserva o sala no encontrada", content = @Content)
+    })
     @PutMapping("/update")
-    public ResponseEntity<?> updateReserva(@Valid @RequestBody ReservaUpdateRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateReserva(@Valid @RequestBody ReservaUpdateRequestDTO request, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
         Long clienteId = user.getId();
 
@@ -134,8 +173,14 @@ public class ReservaApiController {
     }
 
 
+    @Operation(summary = "Actualizar reserva por empleado", description = "Permite a un empleado modificar cualquier reserva.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva actualizada correctamente", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Acceso prohibido", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Reserva o sala no encontrada", content = @Content)
+    })
     @PutMapping("/update/by-empleado")
-    public ResponseEntity<?> updateReservaEmpleado(@RequestBody ReservaUpdateRequest request, Authentication authentication) {
+    public ResponseEntity<?> updateReservaEmpleado(@RequestBody ReservaUpdateRequestDTO request, Authentication authentication) {
         CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
 
         if (user == null || user.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("EMPLEADO"))) {
@@ -161,13 +206,18 @@ public class ReservaApiController {
     }
 
 
+
+    @Operation(summary = "Obtener todas las reservas activas", description = "Devuelve una lista de todas las reservas activas disponibles para el usuario autenticado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de reservas activas obtenida correctamente", content = @Content)
+    })
     @GetMapping("/all/activas")
-    public ResponseEntity<List<ReservaResponse>> getAllReservasActivas(Authentication authentication) {
+    public ResponseEntity<List<ReservaResponseDTO>> getAllReservasActivas(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long clienteId = userDetails.getId();
-        List<ReservaResponse> reservasActivas = reservaService.findAllActivas()
+        List<ReservaResponseDTO> reservasActivas = reservaService.findAllActivas()
                 .stream()
-                .map(reserva -> new ReservaResponse(
+                .map(reserva -> new ReservaResponseDTO(
                         reserva.getId(),
                         reserva.getSala().getNumero(),
                         reserva.getSala().getCantPersonas(),
@@ -180,69 +230,5 @@ public class ReservaApiController {
 
         return ResponseEntity.ok(reservasActivas);
     }
-
-    // dto's
-    @Data
-    public static class ReservaRequestByEmpleado {
-
-        @NotNull(message = "empleadoId es obligatorio")
-        private Long clienteId;
-
-        @NotNull(message = "salaId es obligatorio")
-        private Long salaId;
-
-        @NotNull(message = "fechaInicio es obligatorio")
-        private LocalDateTime fechaInicio;
-
-        @NotNull(message = "fechaFinal es obligatorio")
-        private LocalDateTime fechaFinal;
-
-        @NotNull(message = "tipoPago es obligatorio")
-        private Reserva.TipoPago tipoPago;
-    }
-
-    @Data
-    public static class ReservaRequestByCliente {
-
-        @NotNull(message = "salaId es obligatorio")
-        private Long salaId;
-
-        @NotNull(message = "fechaInicio es obligatorio")
-        private LocalDateTime fechaInicio;
-
-        @NotNull(message = "fechaFinal es obligatorio")
-        private LocalDateTime fechaFinal;
-
-        @NotNull(message = "tipoPago es obligatorio")
-        private Reserva.TipoPago tipoPago;
-    }
-
-    @Data
-    @AllArgsConstructor
-    public static class ReservaResponse {
-        private Long id;
-        private Integer salaNumero;
-        private Integer salaCapacidad;
-        private LocalDateTime fechaInicio;
-        private LocalDateTime fechaFinal;
-        private Reserva.TipoPago tipoPago;
-        private String estado;
-        private String clienteEmail;
-    }
-
-    @Data
-    public static class ReservaUpdateRequest {
-        @NotNull
-        private Long id;
-        @NotNull
-        private Long salaId;
-        @NotNull
-        private LocalDateTime fechaInicio;
-        @NotNull
-        private LocalDateTime fechaFinal;
-        @NotNull
-        private Reserva.TipoPago tipoPago;
-    }
-
 
 }

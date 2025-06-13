@@ -1,31 +1,31 @@
 package com.utn.gestion_de_turnos.controller.api;
 
+import com.utn.gestion_de_turnos.dto.ReservaResponseEnSalaDTO;
 import com.utn.gestion_de_turnos.model.Reserva;
 import com.utn.gestion_de_turnos.model.Sala;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
 import com.utn.gestion_de_turnos.service.ReservaService;
 import com.utn.gestion_de_turnos.service.SalaService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 // Eso es controlador REST para manejar las operaciones CRUD de la entidad Sala
 
+@Tag(name = "Sala", description = "Operaciones relacionadas con salas")
 @RestController
 @RequestMapping("/api/salas")
 public class SalaApiController {
@@ -36,11 +36,22 @@ public class SalaApiController {
     @Autowired
     private ReservaService reservaService;
 
+
+    @Operation(summary = "Crear una nueva sala")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sala creada correctamente"),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos en la solicitud")
+    })
     @PostMapping
     public Sala createSala(@RequestBody Sala sala) {
         return salaService.save(sala);
     }
 
+    @Operation(summary = "Obtener sala por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Sala encontrada y devuelta"),
+            @ApiResponse(responseCode = "404", description = "Sala no encontrada con el ID proporcionado")
+    })
     @GetMapping("/{id}")
     public ResponseEntity<Sala> getSalaById(@PathVariable Long id) {
         return salaService.findById(id)
@@ -49,11 +60,22 @@ public class SalaApiController {
     }
 
 
+    @Operation(summary = "Obtener todas las salas")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de salas devuelta correctamente"),
+            @ApiResponse(responseCode = "404", description = "No se encontraron salas")
+    })
     @GetMapping
     public List<Sala> getAllSalas() {
         return salaService.findAll();
     }
 
+    @Operation(summary = "Eliminar sala por ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Sala eliminada correctamente"),
+            @ApiResponse(responseCode = "409", description = "No se puede eliminar la sala porque tiene reservas activas"),
+            @ApiResponse(responseCode = "500", description = "Error inesperado en el servidor")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSalaById(@PathVariable Long id) {
         try {
@@ -68,6 +90,11 @@ public class SalaApiController {
         }
     }
 
+
+    @Operation(summary = "Verifica si una sala puede ser eliminada (sin reservas activas)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Devuelve true si la sala puede eliminarse, false si no")
+    })
     @GetMapping("/{id}/can-delete")
     public ResponseEntity<Boolean> canDeleteSala(@PathVariable Long id) {
         boolean canDelete = salaService.canDeleteSala(id);
@@ -75,15 +102,19 @@ public class SalaApiController {
     }
 
 
+    @Operation(summary = "Obtiene las reservas activas del cliente autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista de reservas activas del cliente")
+    })
     @GetMapping("/cliente/activas")
-    public ResponseEntity<List<ReservaResponse>> getReservasActivasCliente(Authentication authentication) {
+    public ResponseEntity<List<ReservaResponseEnSalaDTO>> getReservasActivasCliente(Authentication authentication) {
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
         Long clienteId = userDetails.getId();
 
         List<Reserva> reservas = reservaService.findActiveByClienteId(clienteId);
 
-        List<ReservaResponse> response = reservas.stream()
-                .map(reserva -> new ReservaResponse(
+        List<ReservaResponseEnSalaDTO> response = reservas.stream()
+                .map(reserva -> new ReservaResponseEnSalaDTO(
                         reserva.getId(),
                         reserva.getSala().getNumero(),
                         reserva.getSala().getCantPersonas(),
@@ -98,6 +129,10 @@ public class SalaApiController {
     }
 
 
+    @Operation(summary = "Actualiza la descripción de una sala")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "302", description = "Redirige después de actualizar o si la sala no fue encontrada")
+    })
     @PostMapping("/update")
     public String updateSalaDescription(
             @RequestParam Long id,
@@ -117,31 +152,5 @@ public class SalaApiController {
         }
     }
 
-    public static class SalaDisponibilidadUpdateRequest {
-        private boolean disponibilidad;
-
-        public boolean isDisponibilidad() {
-            return disponibilidad;
-        }
-
-        public void setDisponibilidad(boolean disponibilidad) {
-            this.disponibilidad = disponibilidad;
-        }
-    }
-
-
-    // DTOs
-
-    @Data
-    @AllArgsConstructor
-    public static class ReservaResponse {
-        private Long id;
-        private Integer salaNumero;
-        private Integer salaCapacidad;
-        private LocalDateTime fechaInicio;
-        private LocalDateTime fechaFinal;
-        private Reserva.TipoPago tipoPago;
-        private String estado;
-    }
 }
 

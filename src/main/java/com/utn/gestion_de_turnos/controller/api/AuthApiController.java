@@ -1,16 +1,23 @@
 package com.utn.gestion_de_turnos.controller.api;
 
+import com.utn.gestion_de_turnos.dto.JwtAuthenticationResponseDTO;
+import com.utn.gestion_de_turnos.dto.LoginRequestDTO;
+import com.utn.gestion_de_turnos.dto.UserInfoResponseDTO;
 import com.utn.gestion_de_turnos.model.Cliente;
 import com.utn.gestion_de_turnos.model.Usuario;
 import com.utn.gestion_de_turnos.repository.UsuarioRepository;
 import com.utn.gestion_de_turnos.security.CustomUserDetails;
 import com.utn.gestion_de_turnos.security.JwtTokenProvider;
 import com.utn.gestion_de_turnos.service.ClienteService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Autenticación", description = "Endpoints para login, logout y registro")
 public class AuthApiController {
 
     @Autowired
@@ -44,10 +52,17 @@ public class AuthApiController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+
+    @Operation(summary = "Iniciar sesión", description = "Autentica al usuario y devuelve un token JWT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Autenticación exitosa",
+                    content = @Content(schema = @Schema(implementation = JwtAuthenticationResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
+    })
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestDTO loginRequestDTO, HttpServletResponse response) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword())
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -61,13 +76,18 @@ public class AuthApiController {
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
 
-        Usuario usuario = usuarioRepository.findByEmail(loginRequest.getEmail())
+        Usuario usuario = usuarioRepository.findByEmail(loginRequestDTO.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 
-        return ResponseEntity.ok(new JwtAuthenticationResponse(null, usuario.getRol().name()));
+        return ResponseEntity.ok(new JwtAuthenticationResponseDTO(null, usuario.getRol().name()));
     }
 
 
+    @Operation(summary = "Registrar nuevo cliente", description = "Crea un nuevo cliente en el sistema")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Cliente registrado con éxito"),
+            @ApiResponse(responseCode = "400", description = "Email ya registrado")
+    })
     @PostMapping("/register")
     public ResponseEntity<?> registerCliente(@Valid @RequestBody Cliente cliente) {
         if (usuarioRepository.findByEmail(cliente.getEmail()).isPresent()) {
@@ -78,32 +98,21 @@ public class AuthApiController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Cliente registrado con éxito");
     }
 
-    @Data
-    public static class LoginRequest {
-        private String email;
-        private String password;
-    }
-
-    @Data
-    public static class JwtAuthenticationResponse {
-        private String token;
-        private String rol;
-
-        public JwtAuthenticationResponse(String token, String rol) {
-            this.token = token;
-            this.rol = rol;
-        }
-    }
-
+    @Operation(summary = "Obtener usuario actual", description = "Devuelve información del usuario autenticado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Datos del usuario",
+                    content = @Content(schema = @Schema(implementation = UserInfoResponseDTO.class))),
+            @ApiResponse(responseCode = "401", description = "No autenticado")
+    })
     @GetMapping("/me")
-    public ResponseEntity<UserInfoResponse> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<UserInfoResponseDTO> getCurrentUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        UserInfoResponse response = new UserInfoResponse(
+        UserInfoResponseDTO response = new UserInfoResponseDTO(
                 userDetails.getUsername(), // email
                 userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
@@ -114,13 +123,11 @@ public class AuthApiController {
         return ResponseEntity.ok(response);
     }
 
-    @Data
-    @AllArgsConstructor
-    public static class UserInfoResponse {
-        private String email;
-        private String role;
-    }
 
+    @Operation(summary = "Cerrar sesión", description = "Elimina la cookie JWT")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Logout exitoso")
+    })
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         // Crea cookie con el mismo nombre pero con un valor vacío y un tiempo de vida de 0 para eliminarla

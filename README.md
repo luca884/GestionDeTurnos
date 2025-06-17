@@ -121,3 +121,71 @@ El sistema también mostrará calendarios, listados de turnos y permitirá aplic
 - Documentación clara y accesible
 - Ejecutable localmente sin dependencias externas complejas
 - Compatible con navegadores modernos (Chrome, Firefox, Edge)  
+
+
+### LOS DATOS DE PRUEBA
+
+### EMPLEADOS (3)
+1.
+Nombre: Martín
+Apellido: Pereyra
+Teléfono: 2234567890
+Email: martin@correo.com
+DNI: 32145678
+
+2.
+Nombre: Carla
+Apellido: Gutiérrez
+Teléfono: 2231234567
+Email: carla@correo.com
+DNI: 29876543
+
+3.
+Nombre: Joaquín
+Apellido: Roldán
+Teléfono: 2236543210
+Email: joaquin@correo.com
+DNI: 33456789
+
+### CLIENTES (3)
+1.
+Nombre: Florencia
+Apellido: Suárez
+Teléfono: 2237778899
+Email: flor@correo.com
+DNI: 27333444
+
+2.
+Nombre: Diego
+Apellido: Molina
+Teléfono: 2238889900
+Email: diego@correo.com
+DNI: 28555666
+
+3.
+Nombre: Camila
+Apellido: Bustos
+Teléfono: 2239990011
+Email: camila@correo.com
+DNI: 31222888
+
+### SALAS (5)
+1.
+Número: 1
+Nombre: Sala de piano
+
+2.
+Número: 2
+Nombre: Sala de ensayo
+
+3.
+Número: 3
+Nombre: Sala de guitarra
+
+4.
+Número: 4
+Nombre: Sala de canto
+
+5.
+Número: 5
+Nombre: Sala de rock

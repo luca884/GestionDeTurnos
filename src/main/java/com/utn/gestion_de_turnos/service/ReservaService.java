@@ -104,6 +104,23 @@ public class ReservaService {
         reservaRepository.save(reserva);
     }
 
+    @Transactional
+    public void cancelarReservaPorEmpleado(Long reservaId) {
+        Reserva reserva = reservaRepository.findById(reservaId)
+                .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
+
+        if (reserva.getEstado() != Reserva.Estado.ACTIVO) {
+            throw new ReservaNoCancelableException("Solo se pueden cancelar reservas activas");
+        }
+
+        if (reserva.getFechaInicio().isBefore(LocalDateTime.now())) {
+            throw new ReservaNoCancelableException("No se puede cancelar una reserva que ya ha comenzado");
+        }
+        reserva.setEstado(Reserva.Estado.CANCELADO);
+        googleCalendarService.eliminarEvento(reserva.getGoogleEventId());
+        reservaRepository.save(reserva);
+    }
+
 
     @Transactional
     public void modificar(Reserva reserva) {
@@ -198,22 +215,5 @@ public class ReservaService {
     public void updateReserva(Reserva reserva) {
         reservaRepository.save(reserva);
     }
-
-
-    public void cancelarReservaPorEmpleado(Long reservaId) {
-        Reserva reserva = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new ReservaNotFoundException("Reserva no encontrada"));
-
-        if (reserva.getEstado() != Reserva.Estado.ACTIVO) {
-            throw new ReservaNoCancelableException("Solo se pueden cancelar reservas activas");
-        }
-
-        if (reserva.getFechaInicio().isBefore(LocalDateTime.now())) {
-            throw new ReservaNoCancelableException("No se puede cancelar una reserva que ya ha comenzado");
-        }
-        reserva.setEstado(Reserva.Estado.CANCELADO);
-        reservaRepository.save(reserva);
-    }
-
 
 }

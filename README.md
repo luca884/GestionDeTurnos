@@ -4,7 +4,7 @@
 
 Este proyecto surgió tras la finalización del curso de Programación III en la UTN Mar del Plata por un grupo de desarrolladores:
 - Luca Mariño
-- Rustam Sagaddinov
+- Rustam Sagaddinov  https://github.com/RustamLee
 - Rebeca Camargo
 
 ### 1.1 Propósito

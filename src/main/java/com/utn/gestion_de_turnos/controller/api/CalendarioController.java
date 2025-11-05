@@ -120,7 +120,6 @@ public class CalendarioController {
             clienteId = cud.getId();
         }
 
-
         // 👇 esto es lo que pide el error: usar una variable final dentro del stream
         final Long finalClienteId = clienteId;
 
